@@ -8,7 +8,7 @@ using std::string;
 using std::cout;
 
 // constructor
-iLogger::iLogger()
+ILogger::ILogger()
 {
 	string logfilePath = "logs\\TestHarness_";
 	logfilePath.append(getCurrentTimeAsString());
@@ -19,7 +19,7 @@ iLogger::iLogger()
 }
 
 // destructor
-iLogger::~iLogger()
+ILogger::~ILogger()
 {
 	logfile.close();
 	cout << "Logger has been destroyed!\n";
@@ -28,7 +28,7 @@ iLogger::~iLogger()
 // accepts input from test executor for logging to file
 //    logLevel should be a string of the tier of logging for the given message
 //    logMessage should be a descriptive string of what to log
-void iLogger::log(string logLevel, string logMessage)
+void ILogger::Log(string logLevel, string logMessage)
 {
 	logfile << getCurrentTimeAsString() << ", ";
 	logfile << logLevel << ", ";
@@ -36,7 +36,7 @@ void iLogger::log(string logLevel, string logMessage)
 }
 
 // provides current date as a string in YYYYMMDD_HHMMSS format
-string iLogger::getCurrentTimeAsString()
+string ILogger::getCurrentTimeAsString()
 {
 	time_t systemTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 	tm localTime = *localtime(&systemTime);
