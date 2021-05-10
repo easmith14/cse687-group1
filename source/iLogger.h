@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <string>
+#include "TestResult.h"
 
 using std::string;
 using std::fstream;
@@ -11,19 +12,20 @@ class iLogger
 {
 public:
 	// constructor
-	iLogger();
+	iLogger(int a);
 
-	// desctructor
+	// destructor
 	~iLogger();
 
-	// accepts input from test executor for logging to file
-	//    logLevel should be a string of the tier of logging for the given message
-	//    logMessage should be a descriptive string of what to log
-	void log(string, string);
+	// primary interface for the TestExecutor.  
+	// takes TestResult object as input.
+	void log(TestResult);
 
 private:
+	int logLevel;
 	fstream logfile;
-	string getCurrentTimeAsString();
+	string getFileTimeStamp();
+	string getMessageTimeStamp();
 
 };
 
