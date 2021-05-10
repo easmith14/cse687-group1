@@ -25,6 +25,8 @@ Syracuse University
 #include <vector>
 
 #include "iTestable.h"
+#include "CelestialBody.h"
+#include "TestResponse.h"
 
 using std::cout;
 using std::vector;
@@ -36,14 +38,18 @@ int main()
 	//
 	// initialize objectUnderTest
 	//
-	iTestable objectUnderTest("The Sun", "star", 274.0, 9, 1, 3000);
-	objectUnderTest.runBIST(); // executes self-test
-	int M;
-	M = objectUnderTest.testResults.size();  // find out number of tests run & print results
-	for (int i = 0; i < M; ++i) {
-		cout << "test number: " << objectUnderTest.testResults.at(i)->test_num << "\t";
-		cout << "test_name: " << objectUnderTest.testResults.at(i)->test_name << "\t";
-		cout << "test_result: " << objectUnderTest.testResults.at(i)->test_result << "\t";
-		cout << "test_notes: " << objectUnderTest.testResults.at(i)->test_notes << "\n";
+	CelestialBody objectUnderTest("The Sun", "star", 274.0, 9, 1, 3000);
+	TestResponse M;
+	M=objectUnderTest.Test(); // executes self-test
+	int m_size;
+	m_size = M.results.size();
+	
+
+	for (int i = 0; i < m_size; ++i) {
+		cout << "test number: " << M.results.at(i).test_number << "\t";
+		cout << "test_name: " << M.results.at(i).test_name << "\t";
+		cout << "test_result: " << M.results.at(i).test_result << "\t";
+		cout << "test_notes: " << M.results.at(i).test_notes << "\n";
 	}
+	
 }
