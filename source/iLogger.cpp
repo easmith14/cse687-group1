@@ -32,7 +32,7 @@ iLogger::~iLogger()
 //    logMessage should be a descriptive string of what to log
 void iLogger::log(TestResult messageFromExecutor)
 {
-	if (logLevel >= messageFromExecutor.logLevel)
+	if (logLevel <= messageFromExecutor.logLevel)
 	{
 		logfile << getMessageTimeStamp();
 		logfile << ", TEST CASE: ";
@@ -118,21 +118,20 @@ string iLogger::getMessageTimeStamp()
 	{
 		timeString.append("0");
 	}
-	timeString.append(":");
 	timeString.append(std::to_string(localTime.tm_hour));
 
+	timeString.append(":");
 	if (localTime.tm_min < 10)
 	{
 		timeString.append("0");
 	}
-	timeString.append(":");
 	timeString.append(std::to_string(localTime.tm_min));
 
+	timeString.append(":");
 	if (localTime.tm_sec < 10)
 	{
 		timeString.append("0");
 	}
-	timeString.append(":");
 	timeString.append(std::to_string(localTime.tm_sec));
 
 	return timeString;
