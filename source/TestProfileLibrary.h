@@ -17,8 +17,9 @@ public:
     ~TestProfileLibrary();
 
     //instantiates objects and returns vector of created objects
-    void getTestList(vector<iTestable>&);
-
+    vector<iTestable> getTestList();
+    
 };
+
 
 #endif
