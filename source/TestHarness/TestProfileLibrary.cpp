@@ -1,9 +1,9 @@
 #include "TestProfileLibrary.h"
+#include "UserPrompter.h"
+#include "CelestialBody.h"
 
 using std::cout;
 using std::cin;
-using std::endl;
-
 
 //constructor
 TestProfileLibrary::TestProfileLibrary()
@@ -22,17 +22,18 @@ TestProfileLibrary::~TestProfileLibrary()
 
 
 //instantiates objects and returns vector of created objects
-vector<iTestable> TestProfileLibrary::getTestList()
+vector<iTestable*> TestProfileLibrary::GetTestList()
 {
-    vector<iTestable> testProfileVector;
-    vector<iTestable> allAvailableTests;
-    int selection = 0;
-  
+    vector<iTestable*> testProfileVector;
+    vector<iTestable*> allAvailableTests;
+    vector<string> allAvailableTestNames;
+
     /******************
     *Replace/insert desired test class types here */ 
 
-    iTestable testObj1;
-    allAvailableTests.push_back(testObj1);
+    CelestialBody* celestialBody = new CelestialBody("The Sun", "star", 274.0, 0, 1, 3000);
+    allAvailableTests.push_back(celestialBody);
+    allAvailableTestNames.push_back(typeid(*celestialBody).name());
     
 
     //****************
@@ -42,20 +43,17 @@ vector<iTestable> TestProfileLibrary::getTestList()
     
     for (int i = 0; i < allAvailableTests.size(); i++)
     {
-        cout << i+1 << ": " << typeid(allAvailableTests[i]).name() << endl;
+        cout << i+1 << ": " << allAvailableTestNames[i] << "\n";
     }
 
-    cout << endl << "Please select desired test class: ";
-    cin >> selection;
+    UserPrompter prompter;
 
+    int selection = prompter.promptForIntWithinRange("Please select desired test class: ", 1, allAvailableTests.size());
 
     /******************
     *Add else if for additional desired test class selections */
 
-    if (selection == 1)
-    {
-        testProfileVector.push_back(testObj1);
-    }
+    testProfileVector.push_back(allAvailableTests.at(selection - 1));
 
     //****************
 

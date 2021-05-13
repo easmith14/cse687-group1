@@ -1,5 +1,4 @@
-#ifndef TESTPROFILELIBRARY_H
-#define TESTPROFILELIBRARY_H
+#pragma once
 
 #include <iostream>
 #include <vector>
@@ -17,9 +16,5 @@ public:
     ~TestProfileLibrary();
 
     //instantiates objects and returns vector of created objects
-    vector<iTestable> getTestList();
-    
+    vector<iTestable*> GetTestList();
 };
-
-
-#endif

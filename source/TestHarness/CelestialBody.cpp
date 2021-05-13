@@ -100,43 +100,43 @@ TestResponse CelestialBody::Test() {
 	// create test results node
 	TestResult result1;
 
-	result1.test_number = 1; // test sequence number
-	result1.test_name = "test1"; // name of test
-	result1.test_result = false; // pass fail
-	result1.test_notes = "placeholder notes1"; // placeholder for test comments
+	result1.TestNumber = 1; // test sequence number
+	result1.TestName = "test1"; // name of test
+	result1.TestSuccess = false; // pass fail
+	result1.TestNotes = "placeholder notes1"; // placeholder for test comments
 	
 	results.push_back(result1);
 	// dummy tests function 2
 	TestResult result2;
 
-	result2.test_number = 2; // test sequence number
-	result2.test_name = "test2"; // name of test
-	result2.test_result = true; // pass fail
-	result2.test_notes = "placeholder notes2"; // placeholder for test comments
+	result2.TestNumber = 2; // test sequence number
+	result2.TestName = "test2"; // name of test
+	result2.TestSuccess = true; // pass fail
+	result2.TestNotes = "placeholder notes2"; // placeholder for test comments
 
 	results.push_back(result2);
 
 	TestResult result3;
-	result3.test_number = 3; // test sequence number
-	result3.test_name = "test3"; // name of test
-	int a = 10;
-	int b = 0;
-	try
-	{
-		setsurfaceHeight(a, b);
-	}
-	catch (const char* msg)
-	{
-		result3.test_notes = msg;
-	}
-	result3.test_result = false; // pass fail
+	result3.TestNumber = 3; // test sequence number
+	result3.TestName = "test3"; // name of test
+	int a = distanceFromEarth;
+	int b = numberSatellites;
+
+	setsurfaceHeight(a, b);
+
+	result3.TestSuccess = true; // pass fail
 	 // placeholder for test comments
 
 	results.push_back(result3);
 
 	TestResponse response; //function decides whether it was a success as a whole
-	response.results = results;
-	response.success = true;
+	response.Results = results;
+	response.Success = true;
 
 	return response;
+}
+
+string CelestialBody::GetTypeName()
+{
+	return typeid(*this).name();
 }

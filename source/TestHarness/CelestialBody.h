@@ -18,7 +18,7 @@ Syracuse University
 using std::string;
 
 
-class CelestialBody : iTestable
+class CelestialBody : public iTestable
 {
 public:
 
@@ -46,6 +46,7 @@ public:
 
 	//test function for harness compatibility
 	TestResponse Test();
+	string GetTypeName();
 
 private:
 	string bodyName;
