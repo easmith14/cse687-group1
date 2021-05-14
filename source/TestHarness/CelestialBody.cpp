@@ -1,11 +1,10 @@
 /*
-Aaron Mendelsohn
-CIS 687 - M401 Object Oriented Design
+CSE687 - Object Oriented Design
 Syracuse University
 ///////////////////////////////////////////////////////////
-// Final Project by Aaron Mendelsohn to use polymorhism
+// Final Project by Aaron Mendelsohn, Evan Smith, Stephen Woodward, Mike Rice
 ///////////////////////////////////////////////////////////
-3/18/2020
+5/13/2021
 */
 
 #include "CelestialBody.h"

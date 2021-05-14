@@ -1,11 +1,10 @@
 /*
-Aaron Mendelsohn
 CSE687 - Object Oriented Design
 Syracuse University
 ///////////////////////////////////////////////////////////
-// Final Project by Aaron Mendelsohn
+// Final Project by Aaron Mendelsohn, Evan Smith, Stephen Woodward, Mike Rice
 ///////////////////////////////////////////////////////////
-4/29/2021
+5/13/2021
 */
 
 #pragma once

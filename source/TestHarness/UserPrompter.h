@@ -1,10 +1,10 @@
 /*
-Evan Smith
-CIS 554 - M401 Object Oriented Programming in C++
+CSE687 - Object Oriented Design
 Syracuse University
-General Library
-Last Updated: 3 / 10 / 21
-This file describes a series of functions to facilitate safe prompting of users and parsing of their responses.
+///////////////////////////////////////////////////////////
+// Final Project by Aaron Mendelsohn, Evan Smith, Stephen Woodward, Mike Rice
+///////////////////////////////////////////////////////////
+5/13/2021
 */
 
 #pragma once
