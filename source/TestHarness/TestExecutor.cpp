@@ -9,6 +9,8 @@ Syracuse University
 
 #include <vector>
 #include <iostream>
+#include <thread>
+#include <mutex>
 
 #include "Logger.h"
 #include "TestProfileLibrary.h"
@@ -19,22 +21,27 @@ Syracuse University
 using std::cout;
 using std::cin;
 using std::to_string;
+std::mutex mtx;
 
 void TestExecutor::Execute()
 {
 	//get tests to perform
 	TestProfileLibrary library;
+	mtx.lock();
 	vector<iTestable*> classesToTest = library.GetTestList();
-
+	mtx.unlock();
 	//make logger
     UserPrompter prompter;
 	int maxLoggingLevel = 3;
+	mtx.lock();
 	Logger logger(prompter.promptForIntWithinRange("Enter Logging Level (0-" + to_string(maxLoggingLevel) + "): ", 0, maxLoggingLevel));
+	mtx.unlock();
+
+	std::cout << "\n  in executor function thread id = " << std::this_thread::get_id() << "\n";
 
 	for (iTestable* testClass : classesToTest)
 	{
 		TestResponse response;
-
 		try
 		{
 			response = testClass->Test();
@@ -48,6 +55,8 @@ void TestExecutor::Execute()
 		response.ClassName = testClass->GetTypeName();
 
 		logger.Log(response);
+		
+
 	}
 }
 
