@@ -1,0 +1,3 @@
+﻿  server.cpp
+C:\Temp\VS_projects\socketsDemo\socketsDemo\serverDemo\server.cpp(8,1): warning C4326: return type of 'main' should be 'int' instead of 'void'
+  socketsDemo.vcxproj -> C:\Temp\VS_projects\socketsDemo\socketsDemo\Debug\serverDemo.exe

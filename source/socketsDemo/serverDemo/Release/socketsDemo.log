@@ -1,0 +1,7 @@
+﻿  server.cpp
+C:\Temp\VS_projects\socketsDemo\socketsDemo\serverDemo\server.cpp(8,1): warning C4326: return type of 'main' should be 'int' instead of 'void'
+  Generating code
+  Previous IPDB not found, fall back to full compilation.
+  All 11 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  socketsDemo.vcxproj -> C:\Temp\VS_projects\socketsDemo\socketsDemo\Release\serverDemo.exe
