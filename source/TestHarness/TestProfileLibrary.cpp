@@ -2,7 +2,7 @@
 CSE687 - Object Oriented Design
 Syracuse University
 ///////////////////////////////////////////////////////////
-// Final Project by Aaron Mendelsohn, Evan Smith, Stephen Woodward, Mike Rice
+// Final Project by Aaron Mendelsohn, Evan Smith, Stephen Woodard, Mike Rice
 ///////////////////////////////////////////////////////////
 5/13/2021
 */
@@ -39,14 +39,11 @@ vector<iTestable*> TestProfileLibrary::GetTestList()
     /******************
     *Replace/insert desired test class types here */ 
 
-    CelestialBody* celestialBody1 = new CelestialBody("The Sun", "star", 274.0, 0, 1, 3000);
-    allAvailableTests.push_back(celestialBody1);
-    allAvailableTestNames.push_back(typeid(*celestialBody1).name());
-    CelestialBody* celestialBody2 = new CelestialBody("BlackHole Sun", "star", 274.0, 1, 0, 3000);
-    allAvailableTests.push_back(celestialBody2);
-    allAvailableTestNames.push_back(typeid(*celestialBody2).name());
+    CelestialBody* celestialBody = new CelestialBody("The Sun", "star", 274.0, 0, 1, 3000);
+    allAvailableTests.push_back(celestialBody);
+    allAvailableTestNames.push_back(typeid(*celestialBody).name());
+    
 
- 
     //****************
         
 

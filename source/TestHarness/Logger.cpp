@@ -2,7 +2,7 @@
 CSE687 - Object Oriented Design
 Syracuse University
 ///////////////////////////////////////////////////////////
-// Final Project by Aaron Mendelsohn, Evan Smith, Stephen Woodward, Mike Rice
+// Final Project by Aaron Mendelsohn, Evan Smith, Stephen Woodard, Mike Rice
 ///////////////////////////////////////////////////////////
 5/13/2021
 */
@@ -39,9 +39,9 @@ Logger::~Logger()
 void Logger::Log(TestResponse response)
 {
 	//log overall information about all tests opn the class
-	string overallSuccess = response.Success ? "SUCCESS\n" : "FAIL\n";
-	mLogfile << "Testing overall for " << response.ClassName << ": " << overallSuccess << "\n";
-	mLogfile << response.Notes;
+	string overallSuccess = response.Success ? "SUCCESS" : "FAIL";
+	mLogfile << this->getMessageTimeStamp() << " Testing overall for " << response.ClassName << ": " << overallSuccess << "\n";
+	mLogfile << this->getMessageTimeStamp() << " " << response.Notes << "\n";
 
 	//log information about each test
 	for (TestResult result : response.Results)
