@@ -50,7 +50,8 @@ TestResponse TestExecutor::Execute()
 
 		response.ClassName = testClass->GetTypeName();
 
-		logger->Log(response);
+		// un-comment this line if you want the executor to send the log message
+		//logger->Log(response);
 		return response;
 
 	}
