@@ -21,7 +21,7 @@ using std::to_string;
 Logger::Logger(int input)
 {
 	mLogLevel = input;
-	string logfilePath = "..\\..\\socket_w_threadpool_";
+	string logfilePath = "..\\socket_w_threadpool_";
 	logfilePath.append(getFileTimeStamp());
 	logfilePath.append(".log");
 	mLogfile.open(logfilePath, std::ios::out);

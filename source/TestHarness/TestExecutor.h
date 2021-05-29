@@ -2,7 +2,7 @@
 CSE687 - Object Oriented Design
 Syracuse University
 ///////////////////////////////////////////////////////////
-// Final Project by Aaron Mendelsohn, Evan Smith, Stephen Woodward, Mike Rice
+// Final Project by Aaron Mendelsohn, Evan Smith, Stephen Woodard, Mike Rice
 ///////////////////////////////////////////////////////////
 5/13/2021
 */
@@ -14,10 +14,10 @@ Syracuse University
 class TestExecutor
 {
 public:
-	//TestExecutor(Logger*);
+	TestExecutor(Logger*);
 	TestResponse Execute();
 
 private:
-	//Logger* logger;
+	Logger* logger;
 };
 
