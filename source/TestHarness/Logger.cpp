@@ -2,7 +2,7 @@
 CSE687 - Object Oriented Design
 Syracuse University
 ///////////////////////////////////////////////////////////
-// Final Project by Aaron Mendelsohn, Evan Smith, Stephen Woodward, Mike Rice
+// Final Project by Aaron Mendelsohn, Evan Smith, Stephen Woodard, Mike Rice
 ///////////////////////////////////////////////////////////
 5/13/2021
 */
@@ -21,7 +21,7 @@ using std::to_string;
 Logger::Logger(int input)
 {
 	mLogLevel = input;
-	string logfilePath = "..\\..\\logs\\TestHarness_";
+	string logfilePath = "..\\..\\socket_w_threadpool_";
 	logfilePath.append(getFileTimeStamp());
 	logfilePath.append(".log");
 	mLogfile.open(logfilePath, std::ios::out);
@@ -39,9 +39,9 @@ Logger::~Logger()
 void Logger::Log(TestResponse response)
 {
 	//log overall information about all tests opn the class
-	string overallSuccess = response.Success ? "SUCCESS\n" : "FAIL\n";
-	mLogfile << "Testing overall for " << response.ClassName << ": " << overallSuccess << "\n";
-	mLogfile << response.Notes;
+	string overallSuccess = response.Success ? "SUCCESS" : "FAIL";
+	mLogfile << this->getMessageTimeStamp() << " Testing overall for " << response.ClassName << ": " << overallSuccess << "\n";
+	mLogfile << this->getMessageTimeStamp() << " " << response.Notes << "\n";
 
 	//log information about each test
 	for (TestResult result : response.Results)
@@ -90,7 +90,7 @@ string Logger::getFileTimeStamp()
 {
 	time_t systemTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 
-	tm localTime; 
+	tm localTime;
 	localtime_s(&localTime, &systemTime);
 
 	string timeString;
@@ -133,7 +133,7 @@ string Logger::getFileTimeStamp()
 string Logger::getMessageTimeStamp()
 {
 	time_t systemTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	
+
 	tm localTime;
 	localtime_s(&localTime, &systemTime);
 

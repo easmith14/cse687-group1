@@ -140,6 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CelestialBody.cpp" />
+    <ClCompile Include="Logger.cpp" />
     <ClCompile Include="TestExecutor.cpp" />
     <ClCompile Include="TestProfileLibrary.cpp" />
     <ClCompile Include="thread_server.cpp" />
@@ -148,6 +149,7 @@
   <ItemGroup>
     <ClInclude Include="CelestialBody.h" />
     <ClInclude Include="iTestable.h" />
+    <ClInclude Include="Logger.h" />
     <ClInclude Include="TestExecutor.h" />
     <ClInclude Include="TestProfileLibrary.h" />
     <ClInclude Include="TestResponse.h" />

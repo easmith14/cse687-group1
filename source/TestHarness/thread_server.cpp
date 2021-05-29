@@ -108,10 +108,11 @@ private:
         // Pretend we are doing a lot of work
         std::this_thread::sleep_for(std::chrono::seconds(5));
         int maxLoggingLevel = 3;
-        // Logger* logptr = new Logger; // need logger to have a default constructor for this to work
+        Logger logptr(3);
         TestExecutor* task1ptr = new TestExecutor;
-        task1ptr->Execute();
-
+        TestResponse response;
+        response=task1ptr->Execute();
+        logptr.Log(response);
 
         // Send a message to the connection
         const char* messresp = "test accepted";
