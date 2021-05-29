@@ -8,9 +8,16 @@ Syracuse University
 */
 
 #pragma once
+#include "Logger.h"
+#include "TestResponse.h"
+
 class TestExecutor
 {
 public:
-	void Execute();
+	//TestExecutor(Logger*);
+	TestResponse Execute();
+
+private:
+	//Logger* logger;
 };
 

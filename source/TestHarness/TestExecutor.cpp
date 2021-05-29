@@ -10,7 +10,6 @@ Syracuse University
 #include <vector>
 #include <iostream>
 #include <thread>
-#include <mutex>
 
 #include "Logger.h"
 #include "TestProfileLibrary.h"
@@ -21,19 +20,19 @@ Syracuse University
 using std::cout;
 using std::cin;
 using std::to_string;
-std::mutex mtx;
 
-void TestExecutor::Execute()
+//TestExecutor::TestExecutor(Logger* a)
+//	: logger(a)
+//{
+//
+//}
+
+TestResponse TestExecutor::Execute()
 {
 	//get tests to perform
 	TestProfileLibrary library;
 	//
 	vector<iTestable*> classesToTest = library.GetTestList();
-	//mtx.unlock();
-	//make logger
-    //UserPrompter prompter;
-
-	
 
 	std::cout << "\n  in executor function thread id = " << std::this_thread::get_id() << "\n";
 
@@ -51,6 +50,9 @@ void TestExecutor::Execute()
 		}
 
 		response.ClassName = testClass->GetTypeName();
+
+		return response;
+		//logger->Log(response);
 
 	}
 }
