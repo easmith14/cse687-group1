@@ -13,7 +13,7 @@
 #include <iostream> // For cout
 
 using namespace std;
-#define DEFAULT_PORT "444"
+#define DEFAULT_PORT "1337"
 
 // This class manages a thread pool that will process requests
 class thread_pool {
@@ -124,7 +124,7 @@ private:
         logptr.Log(response);
         cout << "\n\t test run on: " << item.second << " is complete : sending results\n";
         // Send a message to the connection
-        const char* messresp = "done-results stored in logger";
+        const char* messresp = "\n\tdone-results stored in logger\n>";
         send(item.first, messresp, (int)strlen(messresp), 0);
     }
 };
@@ -134,6 +134,14 @@ int main() {
     const char *connect_ok = "message_rcvd_by_server";
     const char* sendtest1 = "Test Request1";
     const char* sendtest2 = "Test Request2";
+    const char* welcomeMsg = "Test Harness Server Connected:\nPlease enter a command (type help for available commands):\n>";
+    const char* cmd_help = "help";
+    const char* cmd_exit = "exit";
+    const char* cmd_runtest1 = "runtest1";
+    const char* cmd_runtest2 = "runtest2";
+    const char* msg_help = "\nHELP:\n help - displays help menu\n runtest1 - instructs server to load and run test 1\n runtest2 - instructs server to load and run test 2\n exit - close connection and quit\n>";
+    const char* msg_sendtest = "\nTest Loaded...  testing in progress";
+    const char* msg_exit = "\nserver connection closing...\n\n";
     long SUCCESSFUL;
     WSADATA wsaData;
     WORD DLLVERSION;
@@ -195,14 +203,26 @@ int main() {
         // Grab a connection from the queue
         cout << "\n\tSERVER:  Waiting for incoming connection...\n";
         ClientSocket = accept(ListenSocket, NULL, NULL);
+        cout << " client connected - sending welcome message\n";
 
+        //send welcome message
+        iSendResult = send(ClientSocket, welcomeMsg, strlen(welcomeMsg), 0);
+        if (iSendResult == SOCKET_ERROR) {
+            printf("send failed: %d\n", WSAGetLastError());
+            closesocket(ClientSocket);
+            WSACleanup();
+        }
+
+        //handler for client cmds
         do {
             recvbuf[0]='\0';// clear receive buffer
-             iResult = recv(ClientSocket, recvbuf, recvbuflen, 0);
+            cout << "receiving-";
+            iResult = recv(ClientSocket, recvbuf, recvbuflen, 0);
+            cout << "received\n";
             if (iResult > 0) {
                 //printf("Bytes received: %d\n", iResult);
                 // Echo message received ok
-                iSendResult = send(ClientSocket, connect_ok, (int)strlen(connect_ok), 0);
+                //iSendResult = send(ClientSocket, connect_ok, (int)strlen(connect_ok), 0);
                 //printf("Bytes sent: %d\n", iSendResult);
                 if (iSendResult == SOCKET_ERROR) {
                     printf("send failed: %d\n", WSAGetLastError());
@@ -220,10 +240,70 @@ int main() {
                 WSACleanup();
                 //return 1;
             }
+
+
+            //CMD handling - help
+            if (std::strcmp(recvbuf, cmd_help) == 0)
+            {
+                cout << " client cmd entered - help\n";
+                iSendResult = send(ClientSocket, msg_help, strlen(msg_help), 0);
+                if (iSendResult == SOCKET_ERROR) {
+                    printf("send failed: %d\n", WSAGetLastError());
+                    closesocket(ClientSocket);
+                    WSACleanup();
+                }
+            }
+
+            //CMD handling - runtest1
+            if (std::strcmp(recvbuf, cmd_runtest1) == 0)   // if it's a test request...send to queue
+            {
+                cout << " client cmd entered - runtest1\n";
+                iSendResult = send(ClientSocket, msg_sendtest, strlen(msg_sendtest), 0);
+                if (iSendResult == SOCKET_ERROR) {
+                    printf("send failed: %d\n", WSAGetLastError());
+                    closesocket(ClientSocket);
+                    WSACleanup();
+                }
+                std::string request = sendtest1;
+                tp.queueWork(ClientSocket, request);
+                memset(recvbuf, 0, sizeof(recvbuf));
+            }
+
+            //CMD handling - runtest2
+            if (std::strcmp(recvbuf, cmd_runtest2) == 0)   // if it's a test request...send to queue
+            {
+                cout << " client cmd entered - runtest2\n";
+                iSendResult = send(ClientSocket, msg_sendtest, strlen(msg_sendtest), 0);
+                if (iSendResult == SOCKET_ERROR) {
+                    printf("send failed: %d\n", WSAGetLastError());
+                    closesocket(ClientSocket);
+                    WSACleanup();
+                }
+                std::string request = sendtest2;
+                tp.queueWork(ClientSocket, request);
+                memset(recvbuf, 0, sizeof(recvbuf));
+            }
+            /*
             if (std::strcmp(recvbuf, sendtest1) == 0 || std::strcmp(recvbuf, sendtest2) == 0) {  // if it's a test request...send to queue
                 std::string request = recvbuf;
                 tp.queueWork(ClientSocket, request);
             }
+            */
+
+            //CMD handling - exit
+            if (std::strcmp(recvbuf, cmd_exit) == 0)
+            {
+                cout << " client cmd entered - exit\n\n client disconnecting\n";
+                iSendResult = send(ClientSocket, msg_exit, strlen(msg_exit), 0);
+                if (iSendResult == SOCKET_ERROR) {
+                    printf("send failed: %d\n", WSAGetLastError());
+                    closesocket(ClientSocket);
+                    WSACleanup();
+                }
+                iResult = -1;
+            }
+
+            
         } while (iResult > 0);
     }   
     closesocket(ListenSocket);

@@ -4,7 +4,7 @@
 #include <string>
 
 using namespace std;
-#define DEFAULT_PORT "444"
+#define DEFAULT_PORT "1337"
 
 int main()
 {
@@ -39,111 +39,148 @@ int main()
 		freeaddrinfo(result);
 		WSACleanup();
 	}
-	std::string response;
-	cout << "\n\tCLIENT: Do you want to connect to the server?  (Y/N)";
-	cin >> response;
 
-	response[0] = tolower(response[0]);
-	if (response == "n")
-	{
-		cout << "\n\tQuitting";
-		exit(1);
+	//ready to connect
+	cout << "\n\tCLIENT: Ready to connect - ";
+	system("PAUSE");
+
+	//prep buffer and client messages
+	int recvbuflen = 512;
+	const char* sendbuf = "client is ready\n";
+	const char* sendtest1 = "Test Request1";
+	const char* sendtest2 = "Test Request2";
+	const char* runtest1 = "runtest1";
+	const char* runtest2 = "runtest2";
+	char recvbuf1[512] = { 0 };
+	char recvbuf2[512] = { 0 };
+	string recvdmsg;
+
+	//int iResult;
+	
+	// Connect to server.
+	cout << "\n\tConnecting to server...  ";
+	iResult = connect(ConnectSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
+	if (iResult == SOCKET_ERROR) {
+		closesocket(ConnectSocket);
+		ConnectSocket = INVALID_SOCKET;
 	}
-	else if (response == "y")
-	{
-		int recvbuflen = 512;
-		const char* sendbuf = "client is ready\n";
-		const char* sendtest1 = "Test Request1";
-		const char* sendtest2 = "Test Request2";
-		char recvbuf1[512] = { 0 };
-		char recvbuf2[512] = { 0 };
 
-		int iResult;
-		// Connect to server.
-		cout << "\n\ttrying to connect to server...\n";
-		iResult = connect(ConnectSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
-		if (iResult == SOCKET_ERROR) {
-			closesocket(ConnectSocket);
-			ConnectSocket = INVALID_SOCKET;
+	// recieve welcome from server
+	iResult = recv(ConnectSocket, recvbuf1, recvbuflen, 0);
+	std::string msg1 = recvbuf1;
+	if (iResult > 0)
+		cout << "server connection establish\n\n" << msg1;
+	else if (iResult == 0)
+		printf("Connection closed\n");
+	else
+		printf("recv failed: %d\n", WSAGetLastError());
+
+
+
+	// run client cmd interface
+	bool keepGoing = true;
+	string usrInput;
+	char* usrInputCh;
+
+	while (keepGoing)
+	{
+		//cout << "start loop";
+		cin >> usrInput;
+		sendbuf = usrInput.c_str();
+		cout << "sending-";
+		iResult = send(ConnectSocket, sendbuf, (int)strlen(sendbuf), 0);
+		cout << "sent-";
+		
+		memset(recvbuf1, 0, sizeof(recvbuf1));
+		cout << "receiving-";
+		iResult = recv(ConnectSocket, recvbuf1, recvbuflen, 0);
+		cout << "received";
+		recvdmsg = recvbuf1;
+		cout << recvdmsg;
+		if (std::strcmp(sendbuf, runtest1) == 0 || std::strcmp(sendbuf, runtest2) == 0)
+		{
+			memset(recvbuf1, 0, sizeof(recvbuf1));
+			iResult = recv(ConnectSocket, recvbuf1, recvbuflen, 0);
+			recvdmsg = recvbuf1;
+			cout << recvdmsg;
+			memset(recvbuf1, 0, sizeof(recvbuf1));
 		}
-			// send initial message
-			iResult = send(ConnectSocket, sendbuf, (int)strlen(sendbuf), 0);
-			if (iResult == SOCKET_ERROR) {
-				printf("send failed: %d\n", WSAGetLastError());
-				closesocket(ConnectSocket);
-				WSACleanup();
-			}
-			iResult = recv(ConnectSocket, recvbuf1, recvbuflen, 0); // recieve response from server
-			std::string msg1 = recvbuf1;
-			cout << "message from server: " << msg1 << "\n";
-			if (iResult > 0)
-				printf("Bytes received: %d\n", iResult);
-			else if (iResult == 0)
-				printf("Connection closed\n");
-			else
-				printf("recv failed: %d\n", WSAGetLastError());
 
-			// send test request1
-			iResult = send(ConnectSocket, sendtest1, (int)strlen(sendbuf), 0);
-			if (iResult == SOCKET_ERROR) {
-				printf("send failed: %d\n", WSAGetLastError());
-				closesocket(ConnectSocket);
-				WSACleanup();
-			}
-			recvbuf1[0] = '\0'; //clear buffer  
-			iResult = recv(ConnectSocket, recvbuf1, recvbuflen, 0); // first receive ack
-			std::string msg2 = recvbuf1;
-			cout << "message from server: " << msg2 << "\n";
-			if (iResult > 0)
-				printf("Bytes received: %d\n", iResult);
-			else if (iResult == 0)
-				printf("Connection closed\n");
-			else
-				printf("recv failed: %d\n", WSAGetLastError());
-
-			// send test request2
-			iResult = send(ConnectSocket, sendtest2, (int)strlen(sendbuf), 0);
-			if (iResult == SOCKET_ERROR) {
-				printf("send failed: %d\n", WSAGetLastError());
-				closesocket(ConnectSocket);
-				WSACleanup();
-			}
-			recvbuf1[0] = '\0'; //clear buffer  
-			iResult = recv(ConnectSocket, recvbuf1, recvbuflen, 0); // first receive ack
-			msg2 = recvbuf1;
-			cout << "message from server: " << msg2 << "\n";
-			if (iResult > 0)
-				printf("Bytes received: %d\n", iResult);
-			else if (iResult == 0)
-				printf("Connection closed\n");
-			else
-				printf("recv failed: %d\n", WSAGetLastError());
-
-			iResult = shutdown(ConnectSocket, SD_SEND);
-
-			recvbuf2[0] = '\0'; //clear buffer
-			iResult = recv(ConnectSocket, recvbuf2, recvbuflen, 0); // second is test response
-			std::string msg3 = recvbuf2;
-			cout << "message from server: " << msg3 << "\n";
-			if (iResult > 0)
-				printf("Bytes received: %d\n", iResult);
-			else if (iResult == 0)
-				printf("Connection closed\n");
-			else
-				printf("recv failed: %d\n", WSAGetLastError());
-
-			recvbuf2[0] = '\0'; //clear buffer
-			iResult = recv(ConnectSocket, recvbuf2, recvbuflen, 0); // second is test response
-			msg3 = recvbuf2;
-			cout << "message from server: " << msg3 << "\n";
-			if (iResult > 0)
-				printf("Bytes received: %d\n", iResult);
-			else if (iResult == 0)
-				printf("Connection closed\n");
-			else
-				printf("recv failed: %d\n", WSAGetLastError());
+		if (usrInput == "exit")
+		{
+			keepGoing = false;
+		}
 
 	}
+
+
+
+
+
+	/*
+	// send test request1
+	iResult = send(ConnectSocket, sendtest1, (int)strlen(sendbuf), 0);
+	if (iResult == SOCKET_ERROR) {
+		printf("send failed: %d\n", WSAGetLastError());
+		closesocket(ConnectSocket);
+		WSACleanup();
+	}
+	recvbuf1[0] = '\0'; //clear buffer  
+	iResult = recv(ConnectSocket, recvbuf1, recvbuflen, 0); // first receive ack
+	std::string msg2 = recvbuf1;
+	cout << "message from server: " << msg2 << "\n";
+	if (iResult > 0)
+		printf("Bytes received: %d\n", iResult);
+	else if (iResult == 0)
+		printf("Connection closed\n");
+	else
+		printf("recv failed: %d\n", WSAGetLastError());
+
+	// send test request2
+	iResult = send(ConnectSocket, sendtest2, (int)strlen(sendbuf), 0);
+	if (iResult == SOCKET_ERROR) {
+		printf("send failed: %d\n", WSAGetLastError());
+		closesocket(ConnectSocket);
+		WSACleanup();
+	}
+	recvbuf1[0] = '\0'; //clear buffer  
+	iResult = recv(ConnectSocket, recvbuf1, recvbuflen, 0); // first receive ack
+	msg2 = recvbuf1;
+	cout << "message from server: " << msg2 << "\n";
+	if (iResult > 0)
+		printf("Bytes received: %d\n", iResult);
+	else if (iResult == 0)
+		printf("Connection closed\n");
+	else
+		printf("recv failed: %d\n", WSAGetLastError());
+
+	iResult = shutdown(ConnectSocket, SD_SEND);
+
+	recvbuf2[0] = '\0'; //clear buffer
+	iResult = recv(ConnectSocket, recvbuf2, recvbuflen, 0); // second is test response
+	std::string msg3 = recvbuf2;
+	cout << "message from server: " << msg3 << "\n";
+	if (iResult > 0)
+		printf("Bytes received: %d\n", iResult);
+	else if (iResult == 0)
+		printf("Connection closed\n");
+	else
+		printf("recv failed: %d\n", WSAGetLastError());
+
+	recvbuf2[0] = '\0'; //clear buffer
+	iResult = recv(ConnectSocket, recvbuf2, recvbuflen, 0); // second is test response
+	msg3 = recvbuf2;
+	cout << "message from server: " << msg3 << "\n";
+	if (iResult > 0)
+		printf("Bytes received: %d\n", iResult);
+	else if (iResult == 0)
+		printf("Connection closed\n");
+	else
+		printf("recv failed: %d\n", WSAGetLastError());
+	*/
+	
+	iResult = shutdown(ConnectSocket, SD_SEND);
+
 	system("PAUSE");
 	exit(1);
 }
