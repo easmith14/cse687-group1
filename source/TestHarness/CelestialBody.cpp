@@ -2,7 +2,7 @@
 CSE687 - Object Oriented Design
 Syracuse University
 ///////////////////////////////////////////////////////////
-// Final Project by Aaron Mendelsohn, Evan Smith, Stephen Woodard, Mike Rice
+// Final Project by Aaron Mendelsohn, Evan Smith, Stephen Woodward, Mike Rice
 ///////////////////////////////////////////////////////////
 5/13/2021
 */
@@ -11,7 +11,10 @@ Syracuse University
 #include "TestResult.h"
 #include <string>
 #include <iostream>
+#include <sstream>
 #include <vector>
+#include <thread>         // std::this_thread::sleep_for
+#include <chrono>         // std::chrono::seconds
 
 
 using std::string;
@@ -78,6 +81,7 @@ void CelestialBody::setbodyType(string e) {
 }
 
 void CelestialBody::setsurfaceHeight(double a, double b) {
+		
 		if (b == 0)
 		{
 			throw "Division by zero condition!";
@@ -85,7 +89,10 @@ void CelestialBody::setsurfaceHeight(double a, double b) {
 		else {
 			surfaceHeight=(a / b);
 		}
-	
+		srand(time(NULL));
+		int runtime = rand() % 2 + 1;
+		//cout << runtime << "thread delay time\n";
+		std::this_thread::sleep_for(std::chrono::seconds(runtime));
 }
 
 double CelestialBody::getsurfaceHeight() {

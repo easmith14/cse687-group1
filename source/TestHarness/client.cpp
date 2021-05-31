@@ -53,7 +53,8 @@ int main()
 	{
 		int recvbuflen = 512;
 		const char* sendbuf = "client is ready\n";
-		const char* sendtest = "Test Request";
+		const char* sendtest1 = "Test Request1";
+		const char* sendtest2 = "Test Request2";
 		char recvbuf1[512] = { 0 };
 		char recvbuf2[512] = { 0 };
 
@@ -82,8 +83,8 @@ int main()
 			else
 				printf("recv failed: %d\n", WSAGetLastError());
 
-			// send test request
-			iResult = send(ConnectSocket, sendtest, (int)strlen(sendbuf), 0);
+			// send test request1
+			iResult = send(ConnectSocket, sendtest1, (int)strlen(sendbuf), 0);
 			if (iResult == SOCKET_ERROR) {
 				printf("send failed: %d\n", WSAGetLastError());
 				closesocket(ConnectSocket);
@@ -99,6 +100,27 @@ int main()
 				printf("Connection closed\n");
 			else
 				printf("recv failed: %d\n", WSAGetLastError());
+
+			// send test request2
+			iResult = send(ConnectSocket, sendtest2, (int)strlen(sendbuf), 0);
+			if (iResult == SOCKET_ERROR) {
+				printf("send failed: %d\n", WSAGetLastError());
+				closesocket(ConnectSocket);
+				WSACleanup();
+			}
+			recvbuf1[0] = '\0'; //clear buffer  
+			iResult = recv(ConnectSocket, recvbuf1, recvbuflen, 0); // first receive ack
+			msg2 = recvbuf1;
+			cout << "message from server: " << msg2 << "\n";
+			if (iResult > 0)
+				printf("Bytes received: %d\n", iResult);
+			else if (iResult == 0)
+				printf("Connection closed\n");
+			else
+				printf("recv failed: %d\n", WSAGetLastError());
+
+			iResult = shutdown(ConnectSocket, SD_SEND);
+
 			recvbuf2[0] = '\0'; //clear buffer
 			iResult = recv(ConnectSocket, recvbuf2, recvbuflen, 0); // second is test response
 			std::string msg3 = recvbuf2;
@@ -109,7 +131,18 @@ int main()
 				printf("Connection closed\n");
 			else
 				printf("recv failed: %d\n", WSAGetLastError());
-			iResult = shutdown(ConnectSocket, SD_SEND);
+
+			recvbuf2[0] = '\0'; //clear buffer
+			iResult = recv(ConnectSocket, recvbuf2, recvbuflen, 0); // second is test response
+			msg3 = recvbuf2;
+			cout << "message from server: " << msg3 << "\n";
+			if (iResult > 0)
+				printf("Bytes received: %d\n", iResult);
+			else if (iResult == 0)
+				printf("Connection closed\n");
+			else
+				printf("recv failed: %d\n", WSAGetLastError());
+
 	}
 	system("PAUSE");
 	exit(1);

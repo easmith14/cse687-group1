@@ -2,7 +2,7 @@
 CSE687 - Object Oriented Design
 Syracuse University
 ///////////////////////////////////////////////////////////
-// Final Project by Aaron Mendelsohn, Evan Smith, Stephen Woodard, Mike Rice
+// Final Project by Aaron Mendelsohn, Evan Smith, Stephen Woodward, Mike Rice
 ///////////////////////////////////////////////////////////
 5/13/2021
 */
@@ -21,19 +21,20 @@ using std::cout;
 using std::cin;
 using std::to_string;
 
-TestExecutor::TestExecutor(Logger* a)
-	: logger(a)
-{
-
-}
+//TestExecutor::TestExecutor(Logger* a)
+//	: logger(a)
+//{
+//
+//}
 
 TestResponse TestExecutor::Execute()
 {
 	//get tests to perform
 	TestProfileLibrary library;
+	//
 	vector<iTestable*> classesToTest = library.GetTestList();
 
-	std::cout << "\n  in executor function thread id = " << std::this_thread::get_id() << "\n";
+	//std::cout << "\n  in executor function thread id = " << std::this_thread::get_id() << "\n";
 
 	for (iTestable* testClass : classesToTest)
 	{
@@ -50,9 +51,8 @@ TestResponse TestExecutor::Execute()
 
 		response.ClassName = testClass->GetTypeName();
 
-		// un-comment this line if you want the executor to send the log message
-		//logger->Log(response);
 		return response;
+		//logger->Log(response);
 
 	}
 }
