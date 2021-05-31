@@ -2,7 +2,7 @@
 CSE687 - Object Oriented Design
 Syracuse University
 ///////////////////////////////////////////////////////////
-// Final Project by Aaron Mendelsohn, Evan Smith, Stephen Woodard, Mike Rice
+// Final Project by Aaron Mendelsohn, Evan Smith, Stephen Woodward, Mike Rice
 ///////////////////////////////////////////////////////////
 5/13/2021
 */
@@ -50,17 +50,18 @@ vector<iTestable*> TestProfileLibrary::GetTestList()
     //****************
         
 
-    cout << "Classes available for test\n";
-    
-    for (int i = 0; i < allAvailableTests.size(); i++)
-    {
-        cout << i+1 << ": " << allAvailableTestNames[i] << "\n";
-    }
+    //cout << "Classes available for test\n";
+    //
+    //for (int i = 0; i < allAvailableTests.size(); i++)
+    //{
+    //    cout << i+1 << ": " << allAvailableTestNames[i] << "\n";
+    //}
 
    // UserPrompter prompter;
 
     //int selection = prompter.promptForIntWithinRange("Please select desired test class: ", 1, allAvailableTests.size());
-    int selection = 1;
+    srand(time(NULL));
+    int selection = rand() % 2 + 1;
 
     /******************
     *Add else if for additional desired test class selections */

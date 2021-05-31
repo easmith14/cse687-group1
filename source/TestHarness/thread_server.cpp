@@ -23,6 +23,8 @@ public:
         // function can't figure out this information, it returns 0. 0 is not good,
         // so we create at least 1
         auto numberOfThreads = std::thread::hardware_concurrency();
+        //int numberOfThreads = 4;
+        cout << numberOfThreads << "-test threads have been started\n";
         if (numberOfThreads == 0) {
             numberOfThreads = 1;
         }
@@ -54,13 +56,16 @@ public:
     // that needs to be processed by the thread pool
     void queueWork(int fd, std::string& request) {
         // Grab the mutex
-        std::lock_guard<std::mutex> g(workQueueMutex);
+        cout << request << "-sent to workqueue \n";
+        //std::lock_guard<std::mutex> g(workQueueMutex);
 
         // Push the request to the queue
+        threadMutex.lock();
         workQueue.push(std::pair<int, std::string>(fd, request));
+        threadMutex.unlock();
 
         // Notify one thread that there are requests to process
-        workQueueConditionVariable.notify_one();
+        workQueueConditionVariable.notify_all();
     }
 
 private:
@@ -73,6 +78,7 @@ private:
 
     // Mutex to protect workQueue
     std::mutex workQueueMutex;
+    std::mutex threadMutex;
 
     // Queue of requests waiting to be processed
     std::queue<std::pair<int, std::string>> workQueue;
@@ -85,49 +91,49 @@ private:
     void doWork() {
         // Loop while the queue is not destructing
         while (!done) {
+            cout << "\n  thread id = " << std::this_thread::get_id() << " is waiting for work \n";
+            std::unique_lock<std::mutex> lck(workQueueMutex);
+            workQueueConditionVariable.wait(lck);
+            
+            // Only wake up if there are elements in the queue or the program is shutting down
             std::pair<int, std::string> request;
-
-            // Create a scope, so we don't lock the queue for longer than necessary
-            {
-                std::unique_lock<std::mutex> g(workQueueMutex);
-                workQueueConditionVariable.wait(g, [&] {
-                    // Only wake up if there are elements in the queue or the program is
-                    // shutting down
-                    return !workQueue.empty() || done;
-                    });
-
+            // check if workqueue is empty
+            if (!workQueue.empty()) {
+                cout << "\n  thread id = " << std::this_thread::get_id() << " is working on " << request.second << "\n";
+                threadMutex.lock();
                 request = workQueue.front();
                 workQueue.pop();
+                threadMutex.unlock();
+                processRequest(request);
             }
-
-            processRequest(request);
+            if (workQueue.empty()) { // recheck to see if queue is empty
+                threadMutex.lock();
+                done = true;
+                threadMutex.unlock();
+            }
         }
+        
     }
 
     void processRequest(const std::pair<int, std::string> item) {
-        // Pretend we are doing a lot of work
-        std::this_thread::sleep_for(std::chrono::seconds(5));
         int maxLoggingLevel = 3;
-        Logger logger(3);
-        TestExecutor* task1ptr = new TestExecutor(&logger);
+        Logger logptr(3);
+        TestExecutor* task1ptr = new TestExecutor;
         TestResponse response;
-        response=task1ptr->Execute();
-        logger.Log(response);
-
+        response = task1ptr->Execute();
+        logptr.Log(response);
+        cout << "\n\t test run on: " << item.second << " is complete : sending results\n";
         // Send a message to the connection
-        const char* messresp = "test accepted";
+        const char* messresp = "done-results stored in logger";
         send(item.first, messresp, (int)strlen(messresp), 0);
-        std::cout << "test run performed on : " << item.second << "\n";
-        // Close the connection
-        // closesocket(item.first);
     }
 };
 
 int main() {
     
     const char *connect_ok = "message_rcvd_by_server";
-    const char* sendtest = "Test Request";
-    
+    const char* sendtest1 = "Test Request1";
+    const char* sendtest2 = "Test Request2";
     long SUCCESSFUL;
     WSADATA wsaData;
     WORD DLLVERSION;
@@ -191,12 +197,13 @@ int main() {
         ClientSocket = accept(ListenSocket, NULL, NULL);
 
         do {
-            iResult = recv(ClientSocket, recvbuf, recvbuflen, 0);
+            recvbuf[0]='\0';// clear receive buffer
+             iResult = recv(ClientSocket, recvbuf, recvbuflen, 0);
             if (iResult > 0) {
-                printf("Bytes received: %d\n", iResult);
+                //printf("Bytes received: %d\n", iResult);
                 // Echo message received ok
                 iSendResult = send(ClientSocket, connect_ok, (int)strlen(connect_ok), 0);
-                printf("Bytes sent: %d\n", iSendResult);
+                //printf("Bytes sent: %d\n", iSendResult);
                 if (iSendResult == SOCKET_ERROR) {
                     printf("send failed: %d\n", WSAGetLastError());
                     closesocket(ClientSocket);
@@ -205,7 +212,7 @@ int main() {
                 }
             }
             else if (iResult == 0) {
-                printf("Connection closing...\n");
+                //printf("Connection closing...\n");
             }
             else {
                 printf("recv failed: %d\n", WSAGetLastError());
@@ -213,7 +220,7 @@ int main() {
                 WSACleanup();
                 //return 1;
             }
-            if (std::strcmp(recvbuf, sendtest) == 0) {  // if it's a test request...send to queue
+            if (std::strcmp(recvbuf, sendtest1) == 0 || std::strcmp(recvbuf, sendtest2) == 0) {  // if it's a test request...send to queue
                 std::string request = recvbuf;
                 tp.queueWork(ClientSocket, request);
             }
