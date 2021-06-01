@@ -32,19 +32,19 @@ TestProfileLibrary::~TestProfileLibrary()
 //instantiates objects and returns vector of created objects
 vector<iTestable*> TestProfileLibrary::GetTestList()
 {
-    vector<iTestable*> testProfileVector;
+    //vector<iTestable*> testProfileVector;
     vector<iTestable*> allAvailableTests;
-    vector<string> allAvailableTestNames;
+    //vector<string> allAvailableTestNames;
 
     /******************
     *Replace/insert desired test class types here */ 
 
     CelestialBody* celestialBody1 = new CelestialBody("The Sun", "star", 274.0, 0, 1, 3000);
     allAvailableTests.push_back(celestialBody1);
-    allAvailableTestNames.push_back(typeid(*celestialBody1).name());
+    //allAvailableTestNames.push_back(typeid(*celestialBody1).name());
     CelestialBody* celestialBody2 = new CelestialBody("BlackHole Sun", "star", 274.0, 1, 0, 3000);
     allAvailableTests.push_back(celestialBody2);
-    allAvailableTestNames.push_back(typeid(*celestialBody2).name());
+    //allAvailableTestNames.push_back(typeid(*celestialBody2).name());
 
  
     //****************
@@ -60,17 +60,16 @@ vector<iTestable*> TestProfileLibrary::GetTestList()
    // UserPrompter prompter;
 
     //int selection = prompter.promptForIntWithinRange("Please select desired test class: ", 1, allAvailableTests.size());
-    srand(time(NULL));
-    int selection = rand() % 2 + 1;
+    //srand(time(NULL));
+    //int selection = rand() % 2 + 1;
 
     /******************
     *Add else if for additional desired test class selections */
 
-    testProfileVector.push_back(allAvailableTests.at(selection - 1));
+    //testProfileVector.push_back(allAvailableTests.at(selection - 1));
 
     //****************
 
 
-    return testProfileVector;
-
+    return allAvailableTests;
 }
