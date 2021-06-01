@@ -48,7 +48,6 @@ void Logger::Log(TestResponse response)
 	{
 		logTestResult(result);
 	}
-
 }
 
 // accepts input from test executor for logging to file

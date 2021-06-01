@@ -27,33 +27,24 @@ using std::to_string;
 //
 //}
 
-TestResponse TestExecutor::Execute()
+TestResponse TestExecutor::Execute(iTestable* testClass)
 {
-	//get tests to perform
-	TestProfileLibrary library;
-	//
-	vector<iTestable*> classesToTest = library.GetTestList();
-
 	//std::cout << "\n  in executor function thread id = " << std::this_thread::get_id() << "\n";
 
-	for (iTestable* testClass : classesToTest)
+	TestResponse response;
+	try
 	{
-		TestResponse response;
-		try
-		{
-			response = testClass->Test();
-		}
-		catch (const char* msg)
-		{
-			response.Success = false;
-			response.Notes = msg;
-		}
-
-		response.ClassName = testClass->GetTypeName();
-
-		return response;
-		//logger->Log(response);
-
+		response = testClass->Test();
 	}
+	catch (const char* msg)
+	{
+		response.Success = false;
+		response.Notes = msg;
+	}
+
+	response.ClassName = testClass->GetTypeName();
+
+	return response;
+	//logger->Log(response);
 }
 

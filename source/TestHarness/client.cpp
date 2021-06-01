@@ -1,6 +1,8 @@
 //TCP CLIENT source
 
 #include "client.h"
+#include "JsonMessageGenerator.h"
+#include "json.h"
 #include <string>
 
 using namespace std;
@@ -47,10 +49,7 @@ int main()
 	//prep buffer and client messages
 	int recvbuflen = 512;
 	const char* sendbuf = "client is ready\n";
-	const char* sendtest1 = "Test Request1";
-	const char* sendtest2 = "Test Request2";
-	const char* runtest1 = "runtest1";
-	const char* runtest2 = "runtest2";
+	const char* msg_exit = "\nserver connection closing...\n\n";
 	char recvbuf1[512] = { 0 };
 	char recvbuf2[512] = { 0 };
 	string recvdmsg;
@@ -81,14 +80,16 @@ int main()
 	bool keepGoing = true;
 	string usrInput;
 	char* usrInputCh;
+	JsonMessageGenerator jsonMessageGenerator("Client", result->ai_addr->sa_data, "stand-in destination addr");
+
 
 	while (keepGoing)
 	{
 		//cout << "start loop";
 		cin >> usrInput;
-		sendbuf = usrInput.c_str();
 		cout << "sending-";
-		iResult = send(ConnectSocket, sendbuf, (int)strlen(sendbuf), 0);
+		const char* message = jsonMessageGenerator.GenerateMessage(usrInput, JsonMessageGenerator::MessageType::ClassSelection);
+		iResult = send(ConnectSocket, message, (int)strlen(message), 0);
 		cout << "sent-";
 		
 		memset(recvbuf1, 0, sizeof(recvbuf1));
@@ -96,88 +97,25 @@ int main()
 		iResult = recv(ConnectSocket, recvbuf1, recvbuflen, 0);
 		cout << "received";
 		recvdmsg = recvbuf1;
-		cout << recvdmsg;
-		if (std::strcmp(sendbuf, runtest1) == 0 || std::strcmp(sendbuf, runtest2) == 0)
+		Json::Value val = jsonMessageGenerator.GetValueFromJsonString(recvdmsg);
+
+		//recieve as many responses as we sent in a loop
+		if (val["MessageType"] == std::to_string((int)JsonMessageGenerator::MessageType::ClassOptions))
 		{
-			memset(recvbuf1, 0, sizeof(recvbuf1));
-			iResult = recv(ConnectSocket, recvbuf1, recvbuflen, 0);
-			recvdmsg = recvbuf1;
-			cout << recvdmsg;
-			memset(recvbuf1, 0, sizeof(recvbuf1));
+			Json::Value classes = val["Body"];
+			//for
 		}
 
-		if (usrInput == "exit")
+		else if (val["MessageType"] == std::to_string((int)JsonMessageGenerator::MessageType::Exit))
 		{
 			keepGoing = false;
 		}
 
+		else
+		{
+			cout << val["Body"];
+		}
 	}
-
-
-
-
-
-	/*
-	// send test request1
-	iResult = send(ConnectSocket, sendtest1, (int)strlen(sendbuf), 0);
-	if (iResult == SOCKET_ERROR) {
-		printf("send failed: %d\n", WSAGetLastError());
-		closesocket(ConnectSocket);
-		WSACleanup();
-	}
-	recvbuf1[0] = '\0'; //clear buffer  
-	iResult = recv(ConnectSocket, recvbuf1, recvbuflen, 0); // first receive ack
-	std::string msg2 = recvbuf1;
-	cout << "message from server: " << msg2 << "\n";
-	if (iResult > 0)
-		printf("Bytes received: %d\n", iResult);
-	else if (iResult == 0)
-		printf("Connection closed\n");
-	else
-		printf("recv failed: %d\n", WSAGetLastError());
-
-	// send test request2
-	iResult = send(ConnectSocket, sendtest2, (int)strlen(sendbuf), 0);
-	if (iResult == SOCKET_ERROR) {
-		printf("send failed: %d\n", WSAGetLastError());
-		closesocket(ConnectSocket);
-		WSACleanup();
-	}
-	recvbuf1[0] = '\0'; //clear buffer  
-	iResult = recv(ConnectSocket, recvbuf1, recvbuflen, 0); // first receive ack
-	msg2 = recvbuf1;
-	cout << "message from server: " << msg2 << "\n";
-	if (iResult > 0)
-		printf("Bytes received: %d\n", iResult);
-	else if (iResult == 0)
-		printf("Connection closed\n");
-	else
-		printf("recv failed: %d\n", WSAGetLastError());
-
-	iResult = shutdown(ConnectSocket, SD_SEND);
-
-	recvbuf2[0] = '\0'; //clear buffer
-	iResult = recv(ConnectSocket, recvbuf2, recvbuflen, 0); // second is test response
-	std::string msg3 = recvbuf2;
-	cout << "message from server: " << msg3 << "\n";
-	if (iResult > 0)
-		printf("Bytes received: %d\n", iResult);
-	else if (iResult == 0)
-		printf("Connection closed\n");
-	else
-		printf("recv failed: %d\n", WSAGetLastError());
-
-	recvbuf2[0] = '\0'; //clear buffer
-	iResult = recv(ConnectSocket, recvbuf2, recvbuflen, 0); // second is test response
-	msg3 = recvbuf2;
-	cout << "message from server: " << msg3 << "\n";
-	if (iResult > 0)
-		printf("Bytes received: %d\n", iResult);
-	else if (iResult == 0)
-		printf("Connection closed\n");
-	else
-		printf("recv failed: %d\n", WSAGetLastError());
-	*/
 	
 	iResult = shutdown(ConnectSocket, SD_SEND);
 

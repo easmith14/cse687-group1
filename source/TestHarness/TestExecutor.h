@@ -10,14 +10,11 @@ Syracuse University
 #pragma once
 #include "Logger.h"
 #include "TestResponse.h"
+#include "iTestable.h"
 
 class TestExecutor
 {
 public:
-	//TestExecutor(Logger*);
-	TestResponse Execute();
-
-private:
-	//Logger* logger;
+	TestResponse Execute(iTestable* testClass);
 };
 
