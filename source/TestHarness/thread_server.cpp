@@ -78,7 +78,7 @@ public:
 
         for (iTestable* testable : inpClassesToTest)
         {
-            newAvailableClasses[testable->GetTypeName()] = testable;
+            newAvailableClasses[testable->GetClassDescription()] = testable;
         }
 
         availableClassesToTest = newAvailableClasses;
@@ -87,6 +87,11 @@ public:
     std::map<std::string, iTestable*> getAvailableClassesToTest()
     {
         return availableClassesToTest;
+    }
+
+    void setMaxLoggingLevel(int loggingLevel)
+    {
+        maxLoggingLevel = loggingLevel;
     }
 
 private:
@@ -109,6 +114,9 @@ private:
 
     //address that we are running from (for message purposes)
     std::string sourceAddress;
+
+    //max logging level we should be passing to the logger
+    int maxLoggingLevel = 3;
 
     // This will be set to true when the thread pool is shutting down. This tells
     // the threads to stop looping and finish
@@ -143,8 +151,7 @@ private:
     }
 
     void processRequest(const std::pair<int, std::string> item) {
-        int maxLoggingLevel = 3;
-        Logger logger(3);
+        Logger logger(maxLoggingLevel);
         TestExecutor testExecutor;
         TestResponse response;
 
@@ -168,7 +175,7 @@ private:
 int main() {
     
     const char *connect_ok = "message_rcvd_by_server";
-    const char* welcomeMsg = "Test Harness Server Connected:\nPlease enter a command (--help for available commands):\n>";
+    const char* welcomeMsg = "Test Harness Server Connected:\nPlease select one or many classes to test, separated by spaces\n(or --help for available commands):\n";
     const char* cmd_help = "--help";
     const char* cmd_exit = "--exit";
     const char* cmd_classes = "--classes";
@@ -246,8 +253,18 @@ int main() {
         ClientSocket = accept(ListenSocket, NULL, NULL);
         cout << " client connected - sending welcome message\n";
 
-        //send welcome message
-        iSendResult = send(ClientSocket, welcomeMsg, strlen(welcomeMsg), 0);
+        //send welcome message and initial classes list to prep user
+        
+        const char* message = jsonMessageGenerator.GenerateMessage(welcomeMsg, JsonMessageGenerator::MessageType::UIMessage);
+        iSendResult = send(ClientSocket, message, strlen(message), 0);
+        if (iSendResult == SOCKET_ERROR)
+        {
+            printf("send failed: %d\n", WSAGetLastError());
+            closesocket(ClientSocket);
+            WSACleanup();
+        }
+        message = jsonMessageGenerator.GenerateMessageFromClassNames(tp.getAvailableClassesToTest());
+        iSendResult = send(ClientSocket, message, strlen(message), 0);
         if (iSendResult == SOCKET_ERROR) {
             printf("send failed: %d\n", WSAGetLastError());
             closesocket(ClientSocket);
@@ -256,6 +273,7 @@ int main() {
 
         //handler for client cmds
         do {
+            memset(recvbuf, 0, sizeof(recvbuf));
             recvbuf[0]='\0';// clear receive buffer
             cout << "receiving-";
             iResult = recv(ClientSocket, recvbuf, recvbuflen, 0);
@@ -282,9 +300,28 @@ int main() {
                 //return 1;
             }
 
+            //parse recieved string into JSON
+            Json::Value json = jsonMessageGenerator.GetValueFromJsonString(recvbuf);
+            const char* recievedBody = _strdup(json["Body"].asString().c_str());
+
+            //check to see if it is a command
+            if (json["MessageType"].asInt() == JsonMessageGenerator::MessageType::ClassSelection)
+            {
+                cout << " client requested test for class - " << recievedBody << "\n";
+                const char* message = jsonMessageGenerator.GenerateMessage(msg_sendtest, JsonMessageGenerator::MessageType::UIMessage);
+                iSendResult = send(ClientSocket, message, strlen(message), 0);
+                if (iSendResult == SOCKET_ERROR)
+                {
+                    printf("send failed: %d\n", WSAGetLastError());
+                    closesocket(ClientSocket);
+                    WSACleanup();
+                }
+                string request = recievedBody;
+                tp.queueWork(ClientSocket, request);
+            }
 
             //CMD handling - help
-            if (std::strcmp(recvbuf, cmd_help) == 0)
+            else if (std::strcmp(recievedBody, cmd_help) == 0)
             {
                 cout << " client cmd entered - help\n";
 
@@ -298,9 +335,9 @@ int main() {
             }
 
             //CMD handling - classes
-            else if (std::strcmp(recvbuf, cmd_classes) == 0)
+            else if (std::strcmp(recievedBody, cmd_classes) == 0)
             {
-                cout << " client cmd entered - help\n";
+                cout << " client cmd entered - classes\n";
                 const char* possibleClasses = jsonMessageGenerator.GenerateMessageFromClassNames(tp.getAvailableClassesToTest());
                 iSendResult = send(ClientSocket, possibleClasses, strlen(possibleClasses), 0);
                 if (iSendResult == SOCKET_ERROR)
@@ -312,7 +349,7 @@ int main() {
             }
 
             //CMD handling - exit
-            else if (std::strcmp(recvbuf, cmd_exit) == 0)
+            else if (std::strcmp(recievedBody, cmd_exit) == 0)
             {
                 cout << " client cmd entered - exit\n\n client disconnecting\n";
                 const char* message = jsonMessageGenerator.GenerateMessage(msg_exit, JsonMessageGenerator::MessageType::Exit);
@@ -326,26 +363,10 @@ int main() {
                 iResult = -1;
             }
 
-            //CMD handling - a test was selected
-            else if (tp.getAvailableClassesToTest().count(recvbuf) > 0)   // if it's a test request...send to queue
-            {
-                cout << " client cmd entered - " << recvbuf << "\n";
-                const char* message = jsonMessageGenerator.GenerateMessage(msg_sendtest, JsonMessageGenerator::MessageType::UIMessage);
-                iSendResult = send(ClientSocket, message, strlen(message), 0);
-                if (iSendResult == SOCKET_ERROR) {
-                    printf("send failed: %d\n", WSAGetLastError());
-                    closesocket(ClientSocket);
-                    WSACleanup();
-                }
-                std::string request = recvbuf;
-                tp.queueWork(ClientSocket, request);
-                memset(recvbuf, 0, sizeof(recvbuf));
-            }
-
             //An unrecognized command was provided
             else
             {
-                cout << " client cmd entered - " << recvbuf << "\n";
+                cout << " client cmd entered - " << recievedBody << "\n";
                 const char* message = jsonMessageGenerator.GenerateMessage(msg_badInput, JsonMessageGenerator::MessageType::UIMessage);
                 iSendResult = send(ClientSocket, message, strlen(message), 0);                
                 if (iSendResult == SOCKET_ERROR)
@@ -354,9 +375,7 @@ int main() {
                     closesocket(ClientSocket);
                     WSACleanup();
                 }
-                memset(recvbuf, 0, sizeof(recvbuf));
             }
-
         } while (iResult > 0);
     }   
     closesocket(ListenSocket);
