@@ -20,6 +20,20 @@ const char* JsonMessageGenerator::GenerateMessageFromClassNames(map<string, iTes
     return _strdup(baseMessage.toStyledString().c_str());
 }
 
+std::string JsonMessageGenerator::GetStringFromClassesJson(Json::Value val)
+{
+    std::ostringstream stringStream;
+    Json::Value classes = val["Body"];
+    int i = 1;
+    for (Json::Value className : classes)
+    {
+        stringStream << "\n[" << i++ << "]  " << className.asString() << "\n";
+    }
+    stringStream << "\n>";
+
+    return stringStream.str();
+}
+
 const char* JsonMessageGenerator::GenerateMessageFromTestResponse(TestResponse response)
 {
     //generate Json Value for class names
@@ -29,28 +43,44 @@ const char* JsonMessageGenerator::GenerateMessageFromTestResponse(TestResponse r
     testResponse["Notes"] = response.Notes;
     testResponse["Success"] = response.Success;
 
-    Json::Value testResults;
-    for (auto result : response.Results)
+    if (response.Results.size() > 0)
     {
-        Json::Value formattedResult;
+        Json::Value testResults;
+        for (auto result : response.Results)
+        {
+            Json::Value formattedResult;
 
-        formattedResult["TestName"] = result.TestName;
-        formattedResult["LogLevel"] = result.LogLevel;
-        formattedResult["TestNotes"] = result.TestNotes;
-        formattedResult["TestNumber"] = result.TestNumber;
-        formattedResult["TestSuccess"] = result.TestSuccess;
+            formattedResult["TestName"] = result.TestName;
+            formattedResult["LogLevel"] = result.LogLevel;
+            formattedResult["TestNotes"] = result.TestNotes;
+            formattedResult["TestNumber"] = result.TestNumber;
+            formattedResult["TestSuccess"] = result.TestSuccess;
 
-        testResults.append(formattedResult);
+            testResults.append(formattedResult);
+        }
+
+        testResponse["Results"] = testResults;
     }
-
-    testResponse["Results"] = testResults;
+    else
+    {
+        testResponse["Results"] = "N/A";
+    }
 
     //set values for base message
     Json::Value baseMessage = generateBaseMessage();
-    baseMessage[messageType] = MessageType::ClassOptions;
+    baseMessage[messageType] = MessageType::TestResult;
     baseMessage[body] = testResponse;
     return _strdup(baseMessage.toStyledString().c_str());
 }
+
+const char* JsonMessageGenerator::GenerateMessage(string value, MessageType messageType)
+{
+    Json::Value baseMessage = generateBaseMessage();
+    baseMessage[this->messageType] = messageType;
+    baseMessage[body] = value;
+    return _strdup(baseMessage.toStyledString().c_str());
+}
+
 
 Json::Value JsonMessageGenerator::GetValueFromJsonString(string jsonString)
 {
@@ -61,14 +91,6 @@ Json::Value JsonMessageGenerator::GetValueFromJsonString(string jsonString)
         return output;
     }
     return Json::Value();
-}
-
-const char* JsonMessageGenerator::GenerateMessage(string value, MessageType messageType)
-{
-    Json::Value baseMessage = generateBaseMessage();
-    baseMessage[this->messageType] = messageType;
-    baseMessage[body] = value;
-    return _strdup(baseMessage.toStyledString().c_str());
 }
 
 Json::Value JsonMessageGenerator::generateBaseMessage()

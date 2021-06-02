@@ -4,9 +4,27 @@
 #include "JsonMessageGenerator.h"
 #include "json.h"
 #include <string>
+#include <vector>
+#include <functional>
+#include <exception>
 
-using namespace std;
 #define DEFAULT_PORT "1337"
+
+using std::cout;
+using std::cin;
+
+vector<string> split(string text, char sep)
+{
+	vector<string> tokens;
+	size_t start = 0, end = 0;
+	while ((end = text.find(sep, start)) != string::npos)
+	{
+		tokens.push_back(text.substr(start, end - start));
+		start = end + 1;
+	}
+	tokens.push_back(text.substr(start));
+	return tokens;
+}
 
 int main()
 {
@@ -53,8 +71,7 @@ int main()
 	char recvbuf1[512] = { 0 };
 	char recvbuf2[512] = { 0 };
 	string recvdmsg;
-
-	//int iResult;
+	JsonMessageGenerator jsonMessageGenerator("Client", result->ai_addr->sa_data, "stand-in destination addr");
 	
 	// Connect to server.
 	cout << "\n\tConnecting to server...  ";
@@ -64,56 +81,110 @@ int main()
 		ConnectSocket = INVALID_SOCKET;
 	}
 
-	// recieve welcome from server
+	// recieve welcome and class list from server
 	iResult = recv(ConnectSocket, recvbuf1, recvbuflen, 0);
-	std::string msg1 = recvbuf1;
 	if (iResult > 0)
-		cout << "server connection establish\n\n" << msg1;
+		cout << "server connection established\n\n";
 	else if (iResult == 0)
 		printf("Connection closed\n");
 	else
 		printf("recv failed: %d\n", WSAGetLastError());
+	Json::Value welcomeMessage = jsonMessageGenerator.GetValueFromJsonString(recvbuf1);
 
+	iResult = recv(ConnectSocket, recvbuf1, recvbuflen, 0);
+	if (iResult > 0)
+		cout << "server connection established\n\n";
+	else if (iResult == 0)
+		printf("Connection closed\n");
+	else
+		printf("recv failed: %d\n", WSAGetLastError());
+	Json::Value options = jsonMessageGenerator.GetValueFromJsonString(recvbuf1);
+
+	//print the greetings to the screen
+	cout << welcomeMessage["Body"].asString() << jsonMessageGenerator.GetStringFromClassesJson(options);
 
 
 	// run client cmd interface
 	bool keepGoing = true;
 	string usrInput;
-	char* usrInputCh;
-	JsonMessageGenerator jsonMessageGenerator("Client", result->ai_addr->sa_data, "stand-in destination addr");
-
 
 	while (keepGoing)
 	{
-		//cout << "start loop";
+		int expectedResponses = 1;
 		cin >> usrInput;
-		cout << "sending-";
-		const char* message = jsonMessageGenerator.GenerateMessage(usrInput, JsonMessageGenerator::MessageType::ClassSelection);
-		iResult = send(ConnectSocket, message, (int)strlen(message), 0);
-		cout << "sent-";
-		
-		memset(recvbuf1, 0, sizeof(recvbuf1));
-		cout << "receiving-";
-		iResult = recv(ConnectSocket, recvbuf1, recvbuflen, 0);
-		cout << "received";
-		recvdmsg = recvbuf1;
-		Json::Value val = jsonMessageGenerator.GetValueFromJsonString(recvdmsg);
 
-		//recieve as many responses as we sent in a loop
-		if (val["MessageType"] == std::to_string((int)JsonMessageGenerator::MessageType::ClassOptions))
+		//if a flagged command, send it
+		if (usrInput.substr(0, 2) == "--")
 		{
-			Json::Value classes = val["Body"];
-			//for
+			cout << "sending command-";
+			const char* message = jsonMessageGenerator.GenerateMessage(usrInput, JsonMessageGenerator::MessageType::UserCommand);
+			iResult = send(ConnectSocket, message, (int)strlen(message), 0);
+			cout << "sent-";
 		}
-
-		else if (val["MessageType"] == std::to_string((int)JsonMessageGenerator::MessageType::Exit))
-		{
-			keepGoing = false;
-		}
-
 		else
 		{
-			cout << val["Body"];
+			//we split the potential classes selected by spaces, then parse the single values if possible, else leave them
+			vector<string> arguments = split(usrInput, ' ');
+			//we expect an acknowledgement and a result for each valid request
+			expectedResponses = 2 * arguments.size();
+
+			for (string argument : arguments)
+			{
+				try
+				{
+					//verify argument is both an integer and within our range
+					int choiceIndex = std::stoi(argument);
+					int t = options["Body"].size();
+					if (choiceIndex < 1 || choiceIndex > options["Body"].size())
+					{
+						throw std::exception();
+					}
+
+					//grab the appropriate class name and send it
+					string choiceString = options["Body"][choiceIndex - 1].asString();
+					const char* message = jsonMessageGenerator.GenerateMessage(choiceString, JsonMessageGenerator::MessageType::ClassSelection);
+					iResult = send(ConnectSocket, message, (int)strlen(message), 0);
+				}
+				catch(std::exception e)
+				{
+					//send the known bad message to get error handling from server.
+					//decrement expected responses
+					const char* message = jsonMessageGenerator.GenerateMessage(argument, JsonMessageGenerator::MessageType::Error);
+					iResult = send(ConnectSocket, message, (int)strlen(message), 0);
+					expectedResponses--;
+				}
+			}
+		}
+		
+		for (int i = 0; i < expectedResponses; i++)
+		{
+			memset(recvbuf1, 0, sizeof(recvbuf1));
+			cout << "receiving-";
+			iResult = recv(ConnectSocket, recvbuf1, recvbuflen, 0);
+			cout << "received";
+			recvdmsg = recvbuf1;
+			Json::Value val = jsonMessageGenerator.GetValueFromJsonString(recvdmsg);
+
+			if (val["MessageType"].asInt() == JsonMessageGenerator::MessageType::ClassOptions)
+			{
+				cout << jsonMessageGenerator.GetStringFromClassesJson(val);
+			}
+
+			if (val["MessageType"].asInt() == JsonMessageGenerator::MessageType::TestResult)
+			{
+				//TODO: might want some other formatting logic in the json class here
+				cout << "\n" << val["Body"] << "\n>";
+			}
+
+			else if (val["MessageType"].asInt() == JsonMessageGenerator::MessageType::Exit)
+			{
+				keepGoing = false;
+			}
+
+			else
+			{
+				cout << val["Body"].asString();
+			}
 		}
 	}
 	

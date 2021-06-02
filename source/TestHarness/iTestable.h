@@ -14,5 +14,5 @@ class iTestable
 {
 public:
 		virtual TestResponse Test() = 0;
-		virtual string GetTypeName() = 0;
+		virtual string GetClassDescription() = 0;
 };

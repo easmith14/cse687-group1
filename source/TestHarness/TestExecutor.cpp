@@ -42,7 +42,7 @@ TestResponse TestExecutor::Execute(iTestable* testClass)
 		response.Notes = msg;
 	}
 
-	response.ClassName = testClass->GetTypeName();
+	response.ClassName = testClass->GetClassDescription();
 
 	return response;
 	//logger->Log(response);

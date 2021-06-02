@@ -10,13 +10,13 @@ using std::map;
 class JsonMessageGenerator
 {
 public:
-	JsonMessageGenerator(std::string caller, std::string source, std::string destination)
+	JsonMessageGenerator(string caller, string source, string destination)
 		: caller(caller), source(source), destination(destination)
 	{
 
 	}
 
-	enum MessageType { Error, ClassSelection, ClassOptions, UIMessage, Exit };
+	enum MessageType { Error, ClassSelection, ClassOptions, TestResult, UIMessage, UserCommand, Exit };
 
 	const char* GenerateMessage(string message, MessageType messageType);
 
@@ -25,6 +25,8 @@ public:
 	const char* GenerateMessageFromTestResponse(TestResponse response);
 
 	Json::Value GetValueFromJsonString(string jsonString);
+
+	std::string GetStringFromClassesJson(Json::Value val);
 
 private:
 	std::string caller, source, destination;

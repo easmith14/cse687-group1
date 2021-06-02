@@ -147,7 +147,6 @@
     <ClCompile Include="TestExecutor.cpp" />
     <ClCompile Include="TestProfileLibrary.cpp" />
     <ClCompile Include="thread_server.cpp" />
-    <ClCompile Include="UserPrompter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CelestialBody.h" />
@@ -160,7 +159,6 @@
     <ClInclude Include="TestResponse.h" />
     <ClInclude Include="TestResult.h" />
     <ClInclude Include="thread_server.h" />
-    <ClInclude Include="UserPrompter.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

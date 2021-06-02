@@ -9,7 +9,6 @@ Syracuse University
 
 #include "CelestialBody.h"
 #include "TestResult.h"
-#include <string>
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -142,7 +141,15 @@ TestResponse CelestialBody::Test() {
 	return response;
 }
 
-string CelestialBody::GetTypeName()
+string CelestialBody::GetClassDescription()
 {
-	return typeid(*this).name();
+	//recreate the constructor
+	std::ostringstream stringStream;
+	stringStream << typeid(*this).name() << "(" << bodyName << ", " 
+												<< bodyType << ", " 
+												<< gravity << ", " 
+												<< numberSatellites << ", " 
+												<< distanceFromEarth << ", " 
+												<< surfaceHeight << ")";
+	return stringStream.str();
 }
