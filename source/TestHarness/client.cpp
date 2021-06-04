@@ -7,6 +7,7 @@
 #include <vector>
 #include <functional>
 #include <exception>
+#include <thread>
 
 #define DEFAULT_PORT "1337"
 
@@ -25,6 +26,8 @@ vector<string> split(string text, char sep)
 	tokens.push_back(text.substr(start));
 	return tokens;
 }
+
+
 
 int main()
 {
@@ -65,11 +68,11 @@ int main()
 	system("PAUSE");
 
 	//prep buffer and client messages
-	int recvbuflen = 512;
+	const int recvbuflen = 1024;
 	const char* sendbuf = "client is ready\n";
 	const char* msg_exit = "\nserver connection closing...\n\n";
-	char recvbuf1[512] = { 0 };
-	char recvbuf2[512] = { 0 };
+	char recvbuf1[recvbuflen] = { 0 };
+	char recvbuf2[recvbuflen] = { 0 };
 	string recvdmsg;
 	JsonMessageGenerator jsonMessageGenerator("Client", result->ai_addr->sa_data, "stand-in destination addr");
 	
@@ -91,6 +94,7 @@ int main()
 		printf("recv failed: %d\n", WSAGetLastError());
 	Json::Value welcomeMessage = jsonMessageGenerator.GetValueFromJsonString(recvbuf1);
 
+	recvbuf1[0] = '\0';// clear receive buffer
 	iResult = recv(ConnectSocket, recvbuf1, recvbuflen, 0);
 	if (iResult > 0)
 		cout << "server connection established\n\n";
@@ -107,26 +111,30 @@ int main()
 	// run client cmd interface
 	bool keepGoing = true;
 	string usrInput;
+	std::vector<std::thread> threads;
 
-	while (keepGoing)
-	{
+	//while (keepGoing)
+	//{
 		int expectedResponses = 1;
-		cin >> usrInput;
+		//cin >> usrInput;
 
-		//if a flagged command, send it
-		if (usrInput.substr(0, 2) == "--")
-		{
-			cout << "sending command-";
-			const char* message = jsonMessageGenerator.GenerateMessage(usrInput, JsonMessageGenerator::MessageType::UserCommand);
-			iResult = send(ConnectSocket, message, (int)strlen(message), 0);
-			cout << "sent-";
-		}
-		else
-		{
+		////if a flagged command, send it
+		//if (usrInput.substr(0, 2) == "--")
+		//{
+		//	cout << "sending command-";
+		//	const char* message = jsonMessageGenerator.GenerateMessage(usrInput, JsonMessageGenerator::MessageType::UserCommand);
+		//	iResult = send(ConnectSocket, message, (int)strlen(message), 0);
+		//	cout << "sent-";
+		//}
+		//else
+		//{
 			//we split the potential classes selected by spaces, then parse the single values if possible, else leave them
-			vector<string> arguments = split(usrInput, ' ');
+			vector<string> arguments;
+			arguments.push_back("1");
+			arguments.push_back("2");
 			//we expect an acknowledgement and a result for each valid request
-			expectedResponses = 2 * arguments.size();
+
+			expectedResponses = 2*arguments.size();
 
 			for (string argument : arguments)
 			{
@@ -154,14 +162,14 @@ int main()
 					expectedResponses--;
 				}
 			}
-		}
-		
-		for (int i = 0; i < expectedResponses; i++)
-		{
-			memset(recvbuf1, 0, sizeof(recvbuf1));
+			//iResult = shutdown(ConnectSocket, SD_SEND);
+		//}
+		iResult = shutdown(ConnectSocket, SD_SEND);
+		do { 
+			recvbuf1[0] = '\0';// clear receive buffer
 			cout << "receiving-";
 			iResult = recv(ConnectSocket, recvbuf1, recvbuflen, 0);
-			cout << "received";
+			cout << "received\n";
 			recvdmsg = recvbuf1;
 			Json::Value val = jsonMessageGenerator.GetValueFromJsonString(recvdmsg);
 
@@ -178,17 +186,23 @@ int main()
 
 			else if (val["MessageType"].asInt() == JsonMessageGenerator::MessageType::Exit)
 			{
-				keepGoing = false;
+				iResult = 0;
 			}
 
 			else
 			{
 				cout << val["Body"].asString();
 			}
-		}
-	}
+			cout << "received: " << expectedResponses << "\n";
+			expectedResponses = expectedResponses - 1;
+			if (expectedResponses < 0)
+				iResult = 0;
+
+		} while (iResult > 0);
+	//}
+
+		shutdown(ConnectSocket,SD_BOTH);
 	
-	iResult = shutdown(ConnectSocket, SD_SEND);
 
 	system("PAUSE");
 	exit(1);

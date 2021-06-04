@@ -89,7 +89,7 @@ void CelestialBody::setsurfaceHeight(double a, double b) {
 			surfaceHeight=(a / b);
 		}
 		srand(time(NULL));
-		int runtime = rand() % 2 + 1;
+		int runtime = rand() % 5 + 1;
 		//cout << runtime << "thread delay time\n";
 		std::this_thread::sleep_for(std::chrono::seconds(runtime));
 }

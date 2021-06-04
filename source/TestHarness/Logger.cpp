@@ -26,14 +26,14 @@ Logger::Logger(int input)
 	logfilePath.append(".log");
 	mLogfile.open(logfilePath, std::ios::out);
 
-	cout << "Logger has been instantiated!\n";
+	//cout << "Logger has been instantiated!\n";
 }
 
 // destructor
 Logger::~Logger()
 {
 	mLogfile.close();
-	cout << "Logger has been destroyed!\n";
+	//cout << "Logger has been destroyed!\n";
 }
 
 void Logger::Log(TestResponse response)
