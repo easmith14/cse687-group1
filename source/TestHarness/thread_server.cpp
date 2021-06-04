@@ -26,8 +26,8 @@ public:
         // This returns the number of threads supported by the system. If the
         // function can't figure out this information, it returns 0. 0 is not good,
         // so we create at least 1
-        auto numberOfThreads = std::thread::hardware_concurrency();
-        //int numberOfThreads = 4;
+        //auto numberOfThreads = std::thread::hardware_concurrency();
+        int numberOfThreads = 2;
         cout << numberOfThreads << "-test threads have been started\n";
         if (numberOfThreads == 0) {
             numberOfThreads = 1;
@@ -46,7 +46,7 @@ public:
     ~thread_pool() {
         // So threads know it's time to shut down
         done = true;
-
+        cout << "\t\n shutting down threads....\n";
         // Wake up all the threads, so they can finish and be joined
         workQueueConditionVariable.notify_all();
         for (auto& thread : threads) {
@@ -152,10 +152,10 @@ private:
 
     void processRequest(const std::pair<int, std::string> item) {
         Logger logger(maxLoggingLevel);
-        TestExecutor testExecutor;
+        TestExecutor *testExecutor=new TestExecutor;
         TestResponse response;
 
-        response = testExecutor.Execute(availableClassesToTest[item.second]);
+        response = testExecutor->Execute(availableClassesToTest[item.second]);
         logger.Log(response);
         cout << "\n\t test run on: " << item.second << " is complete : sending results\n";
         
@@ -168,7 +168,14 @@ private:
         const char* messresp = jsonGenerator.GenerateMessageFromTestResponse(response);
 
         // Send a message to the connection
-        send(item.first, messresp, (int)strlen(messresp), 0);
+        int iResult=send(item.first, messresp, (int)strlen(messresp), 0);
+        if (iResult > 1) {
+            printf("send successful\n");
+        }
+        else {
+            printf("send failed: %d\n", iResult);
+            WSACleanup();
+        }
     }
 };
 
@@ -235,19 +242,23 @@ int main() {
 
     // start the threadpool
     thread_pool tp;
-    
+
+
     //grab the possible testable classes
 	TestProfileLibrary library;
     tp.setAvailableClassesToTest(library.GetTestList());
 
+
     //create a JsonConverter to handle any JSON tasks
     JsonMessageGenerator jsonMessageGenerator("Server Main", result->ai_addr->sa_data, "stand-in destination addr");
 
-    while (true) {
-        char recvbuf[512] = { 0 }; // clear buffer
+   // while (true) {
+
+        const int recvbuflen = 1024;
+        char recvbuf[recvbuflen] = { 0 }; // clear buffer
         std::string request = recvbuf;
-        int recvbuflen = 512;
-        int iResult, iSendResult;
+
+        int iSendResult;
         // Grab a connection from the queue
         cout << "\n\tSERVER:  Waiting for incoming connection...\n";
         ClientSocket = accept(ListenSocket, NULL, NULL);
@@ -271,33 +282,21 @@ int main() {
             WSACleanup();
         }
 
+        int count = 0;
+        //memset(recvbuf, 0, sizeof(recvbuf));
         //handler for client cmds
         do {
-            memset(recvbuf, 0, sizeof(recvbuf));
             recvbuf[0]='\0';// clear receive buffer
             cout << "receiving-";
             iResult = recv(ClientSocket, recvbuf, recvbuflen, 0);
             cout << "received\n";
-            if (iResult > 0) {
-                //printf("Bytes received: %d\n", iResult);
-                // Echo message received ok
-                //iSendResult = send(ClientSocket, connect_ok, (int)strlen(connect_ok), 0);
-                //printf("Bytes sent: %d\n", iSendResult);
-                if (iSendResult == SOCKET_ERROR) {
-                    printf("send failed: %d\n", WSAGetLastError());
-                    closesocket(ClientSocket);
-                    WSACleanup();
-                    //return 1;
-                }
+            if (iResult == 0) {
+                printf("Connection closing...\n");
             }
-            else if (iResult == 0) {
-                //printf("Connection closing...\n");
-            }
-            else {
+            else if (iResult < 0) {
                 printf("recv failed: %d\n", WSAGetLastError());
                 closesocket(ClientSocket);
                 WSACleanup();
-                //return 1;
             }
 
             //parse recieved string into JSON
@@ -377,6 +376,12 @@ int main() {
                 }
             }
         } while (iResult > 0);
-    }   
+        tp.~thread_pool();
+
+    //}   
+    
+
+    system("PAUSE");
     closesocket(ListenSocket);
+    exit(1);
 }
