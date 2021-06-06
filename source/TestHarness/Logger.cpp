@@ -10,12 +10,15 @@ Syracuse University
 #include <fstream>
 #include <string>
 #include <chrono>
+#include <mutex>
 
 #include "Logger.h"
 
 using std::string;
 using std::cout;
 using std::to_string;
+
+std::mutex writeMutex;
 
 // constructor
 Logger::Logger(int input)
@@ -40,14 +43,22 @@ void Logger::Log(TestResponse response)
 {
 	//log overall information about all tests opn the class
 	string overallSuccess = response.Success ? "SUCCESS" : "FAIL";
-	mLogfile << this->getMessageTimeStamp() << " Testing overall for " << response.ClassName << ": " << overallSuccess << "\n";
-	mLogfile << this->getMessageTimeStamp() << " " << response.Notes << "\n";
 
+	// create a mutex lock so the threads don't stomp on each other
+	writeMutex.lock();
+	
 	//log information about each test
+	mLogfile << this->getMessageTimeStamp() << " Testing overall for " << response.ClassName << ": " << overallSuccess << "\n";
+	if (response.Notes != "")
+	{
+		mLogfile << this->getMessageTimeStamp() << " " << response.Notes << "\n";
+	}
+
 	for (TestResult result : response.Results)
 	{
 		logTestResult(result);
 	}
+	writeMutex.unlock();
 }
 
 // accepts input from test executor for logging to file
@@ -58,10 +69,11 @@ void Logger::logTestResult(TestResult messageFromExecutor)
 	if (mLogLevel >= messageFromExecutor.LogLevel)
 	{
 		mLogfile << getMessageTimeStamp();
-		mLogfile << ", TEST CASE: ";
+		mLogfile << " TEST CASE: ";
 		mLogfile << messageFromExecutor.TestName;
-		mLogfile << "-";
-		mLogfile << std::to_string(messageFromExecutor.TestNumber);
+		// the lines below have been commented out due to not being needed with current implementation
+		// mLogfile << "-";
+		// mLogfile << std::to_string(messageFromExecutor.TestNumber);
 		if (messageFromExecutor.TestSuccess != NULL)
 		{
 			if (messageFromExecutor.TestSuccess == true)

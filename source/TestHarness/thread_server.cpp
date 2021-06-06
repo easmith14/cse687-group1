@@ -22,7 +22,8 @@ using namespace std;
 // This class manages a thread pool that will process requests
 class thread_pool {
 public:
-    thread_pool(Logger* a) : logger(a), done(false) {
+    thread_pool(Logger* a) 
+        : logger(a), done(false) {
         // This returns the number of threads supported by the system. If the
         // function can't figure out this information, it returns 0. 0 is not good,
         // so we create at least 1
@@ -38,7 +39,6 @@ public:
             // to pass a reference to the function (namespaced with the class name) as
             // the first argument, and the current object as second argument
             threads.push_back(std::thread(&thread_pool::doWork, this));
-            threads[i].detach();
         }
     }
 
@@ -70,7 +70,6 @@ public:
         threadMutex.unlock();
 
         // Notify one thread that there are requests to process
-        done = false;
         workQueueConditionVariable.notify_all();
     }
 
@@ -89,16 +88,6 @@ public:
     std::map<std::string, iTestable*> getAvailableClassesToTest()
     {
         return availableClassesToTest;
-    }
-
-    void setMaxLoggingLevel(int loggingLevel)
-    {
-        maxLoggingLevel = loggingLevel;
-    }
-
-    void setDone(bool done)
-    {
-        done = done;
     }
 
 private:
@@ -122,41 +111,42 @@ private:
     //address that we are running from (for message purposes)
     std::string sourceAddress;
 
-    //max logging level we should be passing to the logger
-    int maxLoggingLevel = 3;
-
     // This will be set to true when the thread pool is shutting down. This tells
     // the threads to stop looping and finish
     bool done;
 
+    // Store a pointer to the logger created in main 
     Logger* logger;
 
     // Function used by the threads to grab work from the queue
     void doWork() {
         // Loop while the queue is not destructing
-        
         while (!done) {
             cout << "\n  thread id = " << std::this_thread::get_id() << " is waiting for work \n";
+            std::unique_lock<std::mutex> lck(workQueueMutex);
+            workQueueConditionVariable.wait(lck);
+            
+            // Only wake up if there are elements in the queue or the program is shutting down
             std::pair<int, std::string> request;
-            {
-                std::unique_lock<std::mutex> lck(workQueueMutex);
-                workQueueConditionVariable.wait(lck, [&] {return !workQueue.empty() || done; });
-                cout << "\n thread id = " << std::this_thread::get_id() << " is awake \n";
-                // Only wake up if there are elements in the queue or the program is shutting down
-                
-                // check if workqueue is empty
-                //threadMutex.lock();
+            // check if workqueue is empty
+            if (!workQueue.empty()) {
+                threadMutex.lock();
                 request = workQueue.front();
                 workQueue.pop();
-                //threadMutex.unlock();
+                threadMutex.unlock();
                 cout << "\n  thread id = " << std::this_thread::get_id() << " is working on " << request.second << "\n";
+                processRequest(request);
             }
-            processRequest(request);
+            if (workQueue.empty()) { // recheck to see if queue is empty
+                threadMutex.lock();
+                done = true;
+                threadMutex.unlock();
+            }
         }
+        
     }
 
     void processRequest(const std::pair<int, std::string> item) {
-        
         TestExecutor *testExecutor=new TestExecutor;
         TestResponse response;
 
@@ -172,7 +162,7 @@ private:
         JsonMessageGenerator jsonGenerator("Server Thread" + serverThreadString, sourceAddress, std::to_string(item.first));
         const char* messresp = jsonGenerator.GenerateMessageFromTestResponse(response);
 
-        //Send a message to the connection
+        // Send a message to the connection
         int iResult=send(item.first, messresp, (int)strlen(messresp), 0);
         if (iResult > 1) {
             printf("send successful\n");
@@ -181,7 +171,6 @@ private:
             printf("send failed: %d\n", iResult);
             WSACleanup();
         }
-        cout << myid << " thread is complete\n";
     }
 };
 
@@ -246,6 +235,7 @@ int main() {
     SOCKET ClientSocket;
     ClientSocket = INVALID_SOCKET;
 
+    // create logger object for the threadpool
     int logLevel = 3;
     Logger logger(logLevel);
 
@@ -315,7 +305,7 @@ int main() {
             //check to see if it is a command
             if (json["MessageType"].asInt() == JsonMessageGenerator::MessageType::ClassSelection)
             {
-                //cout << " client requested test for class - " << recievedBody << "\n";
+                cout << " client requested test for class - " << recievedBody << "\n";
                 const char* message = jsonMessageGenerator.GenerateMessage(msg_sendtest, JsonMessageGenerator::MessageType::UIMessage);
                 iSendResult = send(ClientSocket, message, strlen(message), 0);
                 if (iSendResult == SOCKET_ERROR)
@@ -331,7 +321,7 @@ int main() {
             //CMD handling - help
             else if (std::strcmp(recievedBody, cmd_help) == 0)
             {
-                //cout << " client cmd entered - help\n";
+                cout << " client cmd entered - help\n";
 
                 const char* message = jsonMessageGenerator.GenerateMessage(msg_help, JsonMessageGenerator::MessageType::UIMessage);
                 iSendResult = send(ClientSocket, message, strlen(message), 0);
@@ -345,7 +335,7 @@ int main() {
             //CMD handling - classes
             else if (std::strcmp(recievedBody, cmd_classes) == 0)
             {
-                //cout << " client cmd entered - classes\n";
+                cout << " client cmd entered - classes\n";
                 const char* possibleClasses = jsonMessageGenerator.GenerateMessageFromClassNames(tp.getAvailableClassesToTest());
                 iSendResult = send(ClientSocket, possibleClasses, strlen(possibleClasses), 0);
                 if (iSendResult == SOCKET_ERROR)
@@ -359,7 +349,7 @@ int main() {
             //CMD handling - exit
             else if (std::strcmp(recievedBody, cmd_exit) == 0)
             {
-                //cout << " client cmd entered - exit\n\n client disconnecting\n";
+                cout << " client cmd entered - exit\n\n client disconnecting\n";
                 const char* message = jsonMessageGenerator.GenerateMessage(msg_exit, JsonMessageGenerator::MessageType::Exit);
                 iSendResult = send(ClientSocket, message, strlen(message), 0);
                 if (iSendResult == SOCKET_ERROR)
@@ -374,7 +364,7 @@ int main() {
             //An unrecognized command was provided
             else
             {
-                //cout << " client cmd entered - " << recievedBody << "\n";
+                cout << " client cmd entered - " << recievedBody << "\n";
                 const char* message = jsonMessageGenerator.GenerateMessage(msg_badInput, JsonMessageGenerator::MessageType::UIMessage);
                 iSendResult = send(ClientSocket, message, strlen(message), 0);                
                 if (iSendResult == SOCKET_ERROR)
@@ -385,7 +375,7 @@ int main() {
                 }
             }
         } while (iResult > 0);
-        tp.setDone(true);
+        tp.~thread_pool();
 
     //}   
     
