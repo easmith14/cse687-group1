@@ -22,7 +22,8 @@ using namespace std;
 // This class manages a thread pool that will process requests
 class thread_pool {
 public:
-    thread_pool() : done(false) {
+    thread_pool(Logger* a) 
+        : logger(a), done(false) {
         // This returns the number of threads supported by the system. If the
         // function can't figure out this information, it returns 0. 0 is not good,
         // so we create at least 1
@@ -89,11 +90,6 @@ public:
         return availableClassesToTest;
     }
 
-    void setMaxLoggingLevel(int loggingLevel)
-    {
-        maxLoggingLevel = loggingLevel;
-    }
-
 private:
     // This condition variable is used for the threads to wait until there is work
     // to do
@@ -115,12 +111,12 @@ private:
     //address that we are running from (for message purposes)
     std::string sourceAddress;
 
-    //max logging level we should be passing to the logger
-    int maxLoggingLevel = 3;
-
     // This will be set to true when the thread pool is shutting down. This tells
     // the threads to stop looping and finish
     bool done;
+
+    // Store a pointer to the logger created in main 
+    Logger* logger;
 
     // Function used by the threads to grab work from the queue
     void doWork() {
@@ -151,12 +147,11 @@ private:
     }
 
     void processRequest(const std::pair<int, std::string> item) {
-        Logger logger(maxLoggingLevel);
         TestExecutor *testExecutor=new TestExecutor;
         TestResponse response;
 
         response = testExecutor->Execute(availableClassesToTest[item.second]);
-        logger.Log(response);
+        logger->Log(response);
         cout << "\n\t test run on: " << item.second << " is complete : sending results\n";
         
         auto myid = this_thread::get_id();
@@ -240,8 +235,12 @@ int main() {
     SOCKET ClientSocket;
     ClientSocket = INVALID_SOCKET;
 
+    // create logger object for the threadpool
+    int logLevel = 3;
+    Logger logger(logLevel);
+
     // start the threadpool
-    thread_pool tp;
+    thread_pool tp(&logger);
 
 
     //grab the possible testable classes

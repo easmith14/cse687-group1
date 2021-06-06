@@ -106,31 +106,30 @@ TestResponse CelestialBody::Test() {
 	TestResult result1;
 
 	result1.TestNumber = 1; // test sequence number
-	result1.TestName = "test1"; // name of test
+	result1.TestName = "Generic Test 1"; // name of test
 	result1.TestSuccess = false; // pass fail
-	result1.TestNotes = "placeholder notes1"; // placeholder for test comments
-	
+	result1.TestNotes = "There was a most unfortunate failure."; // placeholder for test comments
 	results.push_back(result1);
+
 	// dummy tests function 2
 	TestResult result2;
-
 	result2.TestNumber = 2; // test sequence number
-	result2.TestName = "test2"; // name of test
+	result2.TestName = "Generic Test 2"; // name of test
 	result2.TestSuccess = true; // pass fail
-	result2.TestNotes = "placeholder notes2"; // placeholder for test comments
-
+	result2.TestNotes = "Test was a smashing success!"; // placeholder for test comments
 	results.push_back(result2);
 
+	// tests function 3
 	TestResult result3;
 	result3.TestNumber = 3; // test sequence number
-	result3.TestName = "test3"; // name of test
+	result3.TestName = "Modify Class Variables"; // name of test
 	int a = distanceFromEarth;
 	int b = numberSatellites;
 
 	setsurfaceHeight(a, b);
 
 	result3.TestSuccess = true; // pass fail
-	 // placeholder for test comments
+	result3.TestNotes = "Function call on setsurfaceHeight with two ints as input";
 
 	results.push_back(result3);
 
