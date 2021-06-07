@@ -39,6 +39,7 @@ public:
             // to pass a reference to the function (namespaced with the class name) as
             // the first argument, and the current object as second argument
             threads.push_back(std::thread(&thread_pool::doWork, this));
+            threads[i].detach();
         }
     }
 
@@ -70,6 +71,7 @@ public:
         threadMutex.unlock();
 
         // Notify one thread that there are requests to process
+        done = false;
         workQueueConditionVariable.notify_all();
     }
 
@@ -88,6 +90,16 @@ public:
     std::map<std::string, iTestable*> getAvailableClassesToTest()
     {
         return availableClassesToTest;
+    }
+
+    //void setMaxLoggingLevel(int loggingLevel)
+    //{
+    //    maxLoggingLevel = loggingLevel;
+    //}
+
+    void setDone(bool done)
+    {
+        done = done;
     }
 
 private:
@@ -121,32 +133,29 @@ private:
     // Function used by the threads to grab work from the queue
     void doWork() {
         // Loop while the queue is not destructing
+        
         while (!done) {
             cout << "\n  thread id = " << std::this_thread::get_id() << " is waiting for work \n";
-            std::unique_lock<std::mutex> lck(workQueueMutex);
-            workQueueConditionVariable.wait(lck);
-            
-            // Only wake up if there are elements in the queue or the program is shutting down
             std::pair<int, std::string> request;
-            // check if workqueue is empty
-            if (!workQueue.empty()) {
-                threadMutex.lock();
+            {
+                std::unique_lock<std::mutex> lck(workQueueMutex);
+                workQueueConditionVariable.wait(lck, [&] {return !workQueue.empty() || done; });
+                cout << "\n thread id = " << std::this_thread::get_id() << " is awake \n";
+                // Only wake up if there are elements in the queue or the program is shutting down
+                
+                // check if workqueue is empty
+                //threadMutex.lock();
                 request = workQueue.front();
                 workQueue.pop();
-                threadMutex.unlock();
+                //threadMutex.unlock();
                 cout << "\n  thread id = " << std::this_thread::get_id() << " is working on " << request.second << "\n";
-                processRequest(request);
             }
-            if (workQueue.empty()) { // recheck to see if queue is empty
-                threadMutex.lock();
-                done = true;
-                threadMutex.unlock();
-            }
+            processRequest(request);
         }
-        
     }
 
     void processRequest(const std::pair<int, std::string> item) {
+        
         TestExecutor *testExecutor=new TestExecutor;
         TestResponse response;
 
@@ -162,7 +171,7 @@ private:
         JsonMessageGenerator jsonGenerator("Server Thread" + serverThreadString, sourceAddress, std::to_string(item.first));
         const char* messresp = jsonGenerator.GenerateMessageFromTestResponse(response);
 
-        // Send a message to the connection
+        //Send a message to the connection
         int iResult=send(item.first, messresp, (int)strlen(messresp), 0);
         if (iResult > 1) {
             printf("send successful\n");
@@ -171,6 +180,7 @@ private:
             printf("send failed: %d\n", iResult);
             WSACleanup();
         }
+        cout << myid << " thread is complete\n";
     }
 };
 
@@ -375,7 +385,7 @@ int main() {
                 }
             }
         } while (iResult > 0);
-        tp.~thread_pool();
+        tp.setDone(true);
 
     //}   
     
