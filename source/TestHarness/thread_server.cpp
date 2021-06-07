@@ -22,7 +22,8 @@ using namespace std;
 // This class manages a thread pool that will process requests
 class thread_pool {
 public:
-    thread_pool(Logger* a) : logger(a), done(false) {
+    thread_pool(Logger* a) 
+        : logger(a), done(false) {
         // This returns the number of threads supported by the system. If the
         // function can't figure out this information, it returns 0. 0 is not good,
         // so we create at least 1
@@ -122,13 +123,11 @@ private:
     //address that we are running from (for message purposes)
     std::string sourceAddress;
 
-    //max logging level we should be passing to the logger
-    int maxLoggingLevel = 3;
-
     // This will be set to true when the thread pool is shutting down. This tells
     // the threads to stop looping and finish
     bool done;
 
+    // Store a pointer to the logger created in main 
     Logger* logger;
 
     // Function used by the threads to grab work from the queue
@@ -246,6 +245,7 @@ int main() {
     SOCKET ClientSocket;
     ClientSocket = INVALID_SOCKET;
 
+    // create logger object for the threadpool
     int logLevel = 3;
     Logger logger(logLevel);
 
@@ -315,7 +315,7 @@ int main() {
             //check to see if it is a command
             if (json["MessageType"].asInt() == JsonMessageGenerator::MessageType::ClassSelection)
             {
-                //cout << " client requested test for class - " << recievedBody << "\n";
+                cout << " client requested test for class - " << recievedBody << "\n";
                 const char* message = jsonMessageGenerator.GenerateMessage(msg_sendtest, JsonMessageGenerator::MessageType::UIMessage);
                 iSendResult = send(ClientSocket, message, strlen(message), 0);
                 if (iSendResult == SOCKET_ERROR)
@@ -331,7 +331,7 @@ int main() {
             //CMD handling - help
             else if (std::strcmp(recievedBody, cmd_help) == 0)
             {
-                //cout << " client cmd entered - help\n";
+                cout << " client cmd entered - help\n";
 
                 const char* message = jsonMessageGenerator.GenerateMessage(msg_help, JsonMessageGenerator::MessageType::UIMessage);
                 iSendResult = send(ClientSocket, message, strlen(message), 0);
@@ -345,7 +345,7 @@ int main() {
             //CMD handling - classes
             else if (std::strcmp(recievedBody, cmd_classes) == 0)
             {
-                //cout << " client cmd entered - classes\n";
+                cout << " client cmd entered - classes\n";
                 const char* possibleClasses = jsonMessageGenerator.GenerateMessageFromClassNames(tp.getAvailableClassesToTest());
                 iSendResult = send(ClientSocket, possibleClasses, strlen(possibleClasses), 0);
                 if (iSendResult == SOCKET_ERROR)
@@ -359,7 +359,7 @@ int main() {
             //CMD handling - exit
             else if (std::strcmp(recievedBody, cmd_exit) == 0)
             {
-                //cout << " client cmd entered - exit\n\n client disconnecting\n";
+                cout << " client cmd entered - exit\n\n client disconnecting\n";
                 const char* message = jsonMessageGenerator.GenerateMessage(msg_exit, JsonMessageGenerator::MessageType::Exit);
                 iSendResult = send(ClientSocket, message, strlen(message), 0);
                 if (iSendResult == SOCKET_ERROR)
@@ -374,7 +374,7 @@ int main() {
             //An unrecognized command was provided
             else
             {
-                //cout << " client cmd entered - " << recievedBody << "\n";
+                cout << " client cmd entered - " << recievedBody << "\n";
                 const char* message = jsonMessageGenerator.GenerateMessage(msg_badInput, JsonMessageGenerator::MessageType::UIMessage);
                 iSendResult = send(ClientSocket, message, strlen(message), 0);                
                 if (iSendResult == SOCKET_ERROR)
