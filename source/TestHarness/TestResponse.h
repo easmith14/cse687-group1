@@ -20,7 +20,7 @@ public:
 	TestResponse()
 		:Success(true)
 	{
-
+		Notes = "No Notes";
 	}
 
 	vector<TestResult> Results;

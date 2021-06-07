@@ -141,19 +141,23 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CelestialBody.cpp" />
+    <ClCompile Include="GaseousCloud.cpp" />
     <ClCompile Include="JsonMessageGenerator.cpp" />
     <ClCompile Include="jsoncpp.cpp" />
     <ClCompile Include="Logger.cpp" />
+    <ClCompile Include="Spacecraft.cpp" />
     <ClCompile Include="TestExecutor.cpp" />
     <ClCompile Include="TestProfileLibrary.cpp" />
     <ClCompile Include="thread_server.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CelestialBody.h" />
+    <ClInclude Include="GaseousCloud.h" />
     <ClInclude Include="iTestable.h" />
     <ClInclude Include="json.h" />
     <ClInclude Include="JsonMessageGenerator.h" />
     <ClInclude Include="Logger.h" />
+    <ClInclude Include="Spacecraft.h" />
     <ClInclude Include="TestExecutor.h" />
     <ClInclude Include="TestProfileLibrary.h" />
     <ClInclude Include="TestResponse.h" />

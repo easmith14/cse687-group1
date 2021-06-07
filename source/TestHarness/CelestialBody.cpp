@@ -109,6 +109,7 @@ TestResponse CelestialBody::Test() {
 	result1.TestName = "Generic Test 1"; // name of test
 	result1.TestSuccess = false; // pass fail
 	result1.TestNotes = "There was a most unfortunate failure."; // placeholder for test comments
+	result1.LogLevel = 1;
 	results.push_back(result1);
 
 	// dummy tests function 2
@@ -117,6 +118,7 @@ TestResponse CelestialBody::Test() {
 	result2.TestName = "Generic Test 2"; // name of test
 	result2.TestSuccess = true; // pass fail
 	result2.TestNotes = "Test was a smashing success!"; // placeholder for test comments
+	result2.LogLevel = 1;
 	results.push_back(result2);
 
 	// tests function 3
@@ -130,6 +132,7 @@ TestResponse CelestialBody::Test() {
 
 	result3.TestSuccess = true; // pass fail
 	result3.TestNotes = "Function call on setsurfaceHeight with two ints as input";
+	result3.LogLevel = 1;
 
 	results.push_back(result3);
 

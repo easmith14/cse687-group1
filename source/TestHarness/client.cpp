@@ -9,25 +9,29 @@
 #include <exception>
 #include <thread>
 
-#define DEFAULT_PORT "1337"
+#define DEFAULT_PORT "13379"
 
 using std::cout;
 using std::cin;
 
-vector<string> split(string text, char sep)
+vector<string> split(string text, string delimiter)
 {
 	vector<string> tokens;
-	size_t start = 0, end = 0;
-	while ((end = text.find(sep, start)) != string::npos)
+	size_t pos = 0;
+	std::string token;
+	while ((pos = text.find(delimiter)) != std::string::npos)
 	{
-		tokens.push_back(text.substr(start, end - start));
-		start = end + 1;
+		token = text.substr(0, pos);
+		tokens.push_back(token);
+		text.erase(0, pos + delimiter.length());
 	}
-	tokens.push_back(text.substr(start));
+	if (text != "")
+	{
+		tokens.push_back(text);
+	}
+
 	return tokens;
 }
-
-
 
 int main()
 {
@@ -113,25 +117,24 @@ int main()
 	string usrInput;
 	std::vector<std::thread> threads;
 
-	//while (keepGoing)
-	//{
+	while (keepGoing)
+	{
 		int expectedResponses = 1;
-		//cin >> usrInput;
+		cin >> usrInput;
 
-		////if a flagged command, send it
-		//if (usrInput.substr(0, 2) == "--")
-		//{
-		//	cout << "sending command-";
-		//	const char* message = jsonMessageGenerator.GenerateMessage(usrInput, JsonMessageGenerator::MessageType::UserCommand);
-		//	iResult = send(ConnectSocket, message, (int)strlen(message), 0);
-		//	cout << "sent-";
-		//}
-		//else
-		//{
+		//if a flagged command, send it
+		if (usrInput.substr(0, 2) == "--")
+		{
+			cout << "sending command-";
+			const char* message = jsonMessageGenerator.GenerateMessage(usrInput, JsonMessageGenerator::MessageType::UserCommand);
+			iResult = send(ConnectSocket, message, (int)strlen(message), 0);
+			cout << "sent-";
+		}
+		else
+		{
 			//we split the potential classes selected by spaces, then parse the single values if possible, else leave them
-			vector<string> arguments;
-			arguments.push_back("1");
-			arguments.push_back("2");
+			vector<string> arguments = split(usrInput, ",");
+
 			//we expect an acknowledgement and a result for each valid request
 
 			expectedResponses = 2*arguments.size();
@@ -163,8 +166,10 @@ int main()
 				}
 			}
 			//iResult = shutdown(ConnectSocket, SD_SEND);
-		//}
+		}
+
 		iResult = shutdown(ConnectSocket, SD_SEND);
+
 		do { 
 			recvbuf1[0] = '\0';// clear receive buffer
 			cout << "receiving-";
@@ -193,13 +198,17 @@ int main()
 			{
 				cout << val["Body"].asString();
 			}
+
 			cout << "received: " << expectedResponses << "\n";
-			expectedResponses = expectedResponses - 1;
-			if (expectedResponses < 0)
+			expectedResponses--;
+
+			if (expectedResponses == 0)
+			{
 				iResult = 0;
+			}
 
 		} while (iResult > 0);
-	//}
+	}
 
 		shutdown(ConnectSocket,SD_BOTH);
 	
