@@ -92,10 +92,10 @@ public:
         return availableClassesToTest;
     }
 
-    void setMaxLoggingLevel(int loggingLevel)
-    {
-        maxLoggingLevel = loggingLevel;
-    }
+    //void setMaxLoggingLevel(int loggingLevel)
+    //{
+    //    maxLoggingLevel = loggingLevel;
+    //}
 
     void setDone(bool done)
     {
