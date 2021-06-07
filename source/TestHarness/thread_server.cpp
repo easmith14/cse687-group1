@@ -17,7 +17,7 @@
 #include <map>
 
 using namespace std;
-#define DEFAULT_PORT "1337"
+#define DEFAULT_PORT "13379"
 
 // This class manages a thread pool that will process requests
 class thread_pool {
@@ -261,7 +261,7 @@ int main() {
     //create a JsonConverter to handle any JSON tasks
     JsonMessageGenerator jsonMessageGenerator("Server Main", result->ai_addr->sa_data, "stand-in destination addr");
 
-   // while (true) {
+    while (true) {
 
         const int recvbuflen = 1024;
         char recvbuf[recvbuflen] = { 0 }; // clear buffer
@@ -387,7 +387,7 @@ int main() {
         } while (iResult > 0);
         tp.setDone(true);
 
-    //}   
+    }   
     
 
     system("PAUSE");

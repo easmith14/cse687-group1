@@ -9,6 +9,8 @@ Syracuse University
 #include "TestProfileLibrary.h"
 #include "UserPrompter.h"
 #include "CelestialBody.h"
+#include "Spacecraft.h"
+#include "GaseousCloud.h"
 
 using std::cout;
 using std::cin;
@@ -39,14 +41,24 @@ vector<iTestable*> TestProfileLibrary::GetTestList()
     /******************
     *Replace/insert desired test class types here */ 
 
+    //celestialBodies
     CelestialBody* celestialBody1 = new CelestialBody("The Sun", "star", 274.0, 0, 1, 3000);
     allAvailableTests.push_back(celestialBody1);
-    //allAvailableTestNames.push_back(typeid(*celestialBody1).name());
     CelestialBody* celestialBody2 = new CelestialBody("BlackHole Sun", "star", 274.0, 1, 0, 3000);
     allAvailableTests.push_back(celestialBody2);
-    //allAvailableTestNames.push_back(typeid(*celestialBody2).name());
 
- 
+    //spacecraft
+    Spacecraft* spaceCraft1 = new Spacecraft("HydraFleet", 80, 50);
+    allAvailableTests.push_back(spaceCraft1);
+    Spacecraft* spaceCraft2 = new Spacecraft("Tesla", 0, 34);
+    allAvailableTests.push_back(spaceCraft2);
+
+    //gaseous clouds
+    GaseousCloud* gaseousCloud1 = new GaseousCloud("Oort", 2222, 454, "Red", false);
+    allAvailableTests.push_back(gaseousCloud1);
+    GaseousCloud* gaseousCloud2 = new GaseousCloud("Mork", 3434, 3455, "Purple", true);
+    allAvailableTests.push_back(gaseousCloud2);
+
     //****************
         
 
