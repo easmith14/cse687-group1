@@ -36,3 +36,6 @@
 /source/*.vs/
 /source/*/Debug/*
 /logs/*
+/source/DLLs/*
+/source/TestObjects/Character/Character/Debug/*
+/source/TestObjects/Vehicle/Vehicle/Debug/*
