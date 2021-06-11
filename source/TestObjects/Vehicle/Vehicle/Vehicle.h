@@ -6,6 +6,8 @@
 #define VEHICLE_API __declspec(dllimport)
 #endif
 
+#include "../../../TestHarness/TestResult.h"
+#include "../../../TestHarness/TestResponse.h"
 #include <string>
 using std::string;
 
@@ -22,3 +24,5 @@ extern "C" VEHICLE_API int get_vehicle_xpos();
 extern "C" VEHICLE_API int get_vehicle_ypos();
 
 extern "C" VEHICLE_API void update_vehicle_pos(const int a);
+
+extern "C" VEHICLE_API TestResponse test();

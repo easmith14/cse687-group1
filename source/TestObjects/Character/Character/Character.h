@@ -6,6 +6,8 @@
 #define CHARACTER_API __declspec(dllimport)
 #endif
 
+#include "../../../TestHarness/TestResult.h"
+#include "../../../TestHarness/TestResponse.h"
 #include <string>
 using std::string;
 
@@ -18,3 +20,5 @@ extern "C" CHARACTER_API void heal_damage(const int a);
 extern "C" CHARACTER_API bool check_if_alive();
 
 extern "C" CHARACTER_API void level_up();
+
+extern "C" CHARACTER_API TestResponse test();

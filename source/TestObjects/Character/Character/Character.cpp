@@ -1,6 +1,8 @@
 #include <string>
 #include "pch.h"
 #include "Character.h"
+#include "../../../TestHarness/TestResponse.h"
+#include "../../../TestHarness/TestResult.h"
 using std::string;
 
 static string _CharName;
@@ -72,4 +74,21 @@ void level_up()
 
 	// increase current health by same amount
 	_CharCurrentHealth = _CharCurrentHealth + _HealthScalingFactor;
+}
+
+TestResponse test()
+{
+	TestResponse response;
+
+	// Test Case 1 : TODO
+	// Test Case 2 : TODO
+	// Test Case 3 : TODO
+
+	// On the chance you are reading this and this test function is not yet implemented..
+	// might I suggest using the Vehicle DLL instead?
+	// unlike this project, test is actually implemented!
+	// (and expertly written if I do say so)
+
+	return response;
+
 }
