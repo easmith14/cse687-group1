@@ -80,14 +80,49 @@ TestResponse test()
 {
 	TestResponse response;
 
-	// Test Case 1 : TODO
-	// Test Case 2 : TODO
-	// Test Case 3 : TODO
+	// Test Case 1 : Passing Case
+	TestResult passResult;
+	passResult.LogLevel = 3;
+	passResult.TestName = "PASS Test";
+	passResult.TestNotes = "This test will always pass";
+	passResult.TestNumber = 1;
+	passResult.TestSuccess = true;
+	response.Results.push_back(passResult);
 
-	// On the chance you are reading this and this test function is not yet implemented..
-	// might I suggest using the Vehicle DLL instead?
-	// unlike this project, test is actually implemented!
-	// (and expertly written if I do say so)
+	// Test Case 2 : Level Up Check
+	TestResult levelUpResult;
+	levelUpResult.LogLevel = 1;
+	levelUpResult.TestName = "Level Up Check";
+	levelUpResult.TestNotes = "Check whether or not the level-up system is working";
+	levelUpResult.TestNumber = 2;
+	int origStrength = _CharStrength;
+	level_up();
+	if (origStrength == _CharStrength + 1)
+	{
+		levelUpResult.TestSuccess = true;
+	}
+	else
+	{
+		levelUpResult.TestSuccess = false;
+	}
+	response.Results.push_back(levelUpResult);
+
+	// Test Case 3 : Character Transcends Humanity
+	TestResult transcendResult;
+	transcendResult.LogLevel = 1;
+	transcendResult.TestName = "Transcend Mortal Coil";
+	transcendResult.TestNotes = "And this is to go even further.. beyond";
+	transcendResult.TestNumber = 3;
+
+	// test should break since level is stored as an int
+	unsigned long maxULong = 2147483647;
+	for (unsigned long i = 0; i < maxULong; i++)
+	{
+		level_up();
+	}
+	// if the test made it this far then it is a pass
+	transcendResult.TestSuccess = true;
+	response.Results.push_back(transcendResult);
 
 	return response;
 
