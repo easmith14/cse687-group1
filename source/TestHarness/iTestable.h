@@ -2,7 +2,7 @@
 CSE687 - Object Oriented Design
 Syracuse University
 ///////////////////////////////////////////////////////////
-// Final Project by Aaron Mendelsohn, Evan Smith, Stephen Woodward, Mike Rice
+// Final Project by Aaron Mendelsohn, Evan Smith, Stephen Woodard, Mike Rice
 ///////////////////////////////////////////////////////////
 5/9/2021
 */
@@ -14,5 +14,5 @@ class iTestable
 {
 public:
 		virtual TestResponse Test() = 0;
-		virtual string GetTypeName() = 0;
+		virtual string GetClassDescription() = 0;
 };

@@ -2,7 +2,7 @@
 CSE687 - Object Oriented Design
 Syracuse University
 ///////////////////////////////////////////////////////////
-// Final Project by Aaron Mendelsohn, Evan Smith, Stephen Woodward, Mike Rice
+// Final Project by Aaron Mendelsohn, Evan Smith, Stephen Woodard, Mike Rice
 ///////////////////////////////////////////////////////////
 5/13/2021
 */
@@ -10,6 +10,7 @@ Syracuse University
 #include <fstream>
 #include <string>
 #include <chrono>
+#include <mutex>
 
 #include "Logger.h"
 
@@ -17,38 +18,47 @@ using std::string;
 using std::cout;
 using std::to_string;
 
+std::mutex writeMutex;
+
 // constructor
 Logger::Logger(int input)
 {
 	mLogLevel = input;
-	string logfilePath = "..\\..\\logs\\TestHarness_";
+	string logfilePath = "..\\socket_w_threadpool_";
 	logfilePath.append(getFileTimeStamp());
 	logfilePath.append(".log");
 	mLogfile.open(logfilePath, std::ios::out);
 
-	cout << "Logger has been instantiated!\n";
+	//cout << "Logger has been instantiated!\n";
 }
 
 // destructor
 Logger::~Logger()
 {
 	mLogfile.close();
-	cout << "Logger has been destroyed!\n";
+	//cout << "Logger has been destroyed!\n";
 }
 
 void Logger::Log(TestResponse response)
 {
 	//log overall information about all tests opn the class
-	string overallSuccess = response.Success ? "SUCCESS\n" : "FAIL\n";
-	mLogfile << "Testing overall for " << response.ClassName << ": " << overallSuccess << "\n";
-	mLogfile << response.Notes;
+	string overallSuccess = response.Success ? "SUCCESS" : "FAIL";
 
+	// create a mutex lock so the threads don't stomp on each other
+	writeMutex.lock();
+	
 	//log information about each test
+	mLogfile << this->getMessageTimeStamp() << " Testing overall for " << response.ClassName << ": " << overallSuccess << "\n";
+	if (response.Notes != "")
+	{
+		mLogfile << this->getMessageTimeStamp() << " " << response.Notes << "\n";
+	}
+
 	for (TestResult result : response.Results)
 	{
 		logTestResult(result);
 	}
-
+	writeMutex.unlock();
 }
 
 // accepts input from test executor for logging to file
@@ -59,10 +69,11 @@ void Logger::logTestResult(TestResult messageFromExecutor)
 	if (mLogLevel >= messageFromExecutor.LogLevel)
 	{
 		mLogfile << getMessageTimeStamp();
-		mLogfile << ", TEST CASE: ";
+		mLogfile << " TEST CASE: ";
 		mLogfile << messageFromExecutor.TestName;
-		mLogfile << "-";
-		mLogfile << std::to_string(messageFromExecutor.TestNumber);
+		// the lines below have been commented out due to not being needed with current implementation
+		// mLogfile << "-";
+		// mLogfile << std::to_string(messageFromExecutor.TestNumber);
 		if (messageFromExecutor.TestSuccess != NULL)
 		{
 			if (messageFromExecutor.TestSuccess == true)
@@ -90,7 +101,7 @@ string Logger::getFileTimeStamp()
 {
 	time_t systemTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 
-	tm localTime; 
+	tm localTime;
 	localtime_s(&localTime, &systemTime);
 
 	string timeString;
@@ -133,7 +144,7 @@ string Logger::getFileTimeStamp()
 string Logger::getMessageTimeStamp()
 {
 	time_t systemTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	
+
 	tm localTime;
 	localtime_s(&localTime, &systemTime);
 

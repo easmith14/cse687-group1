@@ -9,6 +9,7 @@ Syracuse University
 
 #include <vector>
 #include <iostream>
+#include <thread>
 
 #include "Logger.h"
 #include "TestProfileLibrary.h"
@@ -20,34 +21,30 @@ using std::cout;
 using std::cin;
 using std::to_string;
 
-void TestExecutor::Execute()
+//TestExecutor::TestExecutor(Logger* a)
+//	: logger(a)
+//{
+//
+//}
+
+TestResponse TestExecutor::Execute(iTestable* testClass)
 {
-	//get tests to perform
-	TestProfileLibrary library;
-	vector<iTestable*> classesToTest = library.GetTestList();
+	//std::cout << "\n  in executor function thread id = " << std::this_thread::get_id() << "\n";
 
-	//make logger
-    UserPrompter prompter;
-	int maxLoggingLevel = 3;
-	Logger logger(prompter.promptForIntWithinRange("Enter Logging Level (0-" + to_string(maxLoggingLevel) + "): ", 0, maxLoggingLevel));
-
-	for (iTestable* testClass : classesToTest)
+	TestResponse response;
+	try
 	{
-		TestResponse response;
-
-		try
-		{
-			response = testClass->Test();
-		}
-		catch (const char* msg)
-		{
-			response.Success = false;
-			response.Notes = msg;
-		}
-
-		response.ClassName = testClass->GetTypeName();
-
-		logger.Log(response);
+		response = testClass->Test();
 	}
+	catch (const char* msg)
+	{
+		response.Success = false;
+		response.Notes = msg;
+	}
+
+	response.ClassName = testClass->GetClassDescription();
+
+	return response;
+	//logger->Log(response);
 }
 

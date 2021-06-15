@@ -2,7 +2,7 @@
 CSE687 - Object Oriented Design
 Syracuse University
 ///////////////////////////////////////////////////////////
-// Final Project by Aaron Mendelsohn, Evan Smith, Stephen Woodward, Mike Rice
+// Final Project by Aaron Mendelsohn, Evan Smith, Stephen Woodard, Mike Rice
 ///////////////////////////////////////////////////////////
 5/13/2021
 */
@@ -45,7 +45,7 @@ public:
 
 	//test function for harness compatibility
 	TestResponse Test();
-	string GetTypeName();
+	string GetClassDescription();
 
 private:
 	string bodyName;

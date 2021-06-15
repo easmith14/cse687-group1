@@ -8,9 +8,13 @@ Syracuse University
 */
 
 #pragma once
+#include "Logger.h"
+#include "TestResponse.h"
+#include "iTestable.h"
+
 class TestExecutor
 {
 public:
-	void Execute();
+	TestResponse Execute(iTestable* testClass);
 };
 

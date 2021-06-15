@@ -36,6 +36,8 @@
 /source/*.vs/
 /source/*/Debug/*
 /logs/*
+/source/TestHarness/x64
 /source/DLLs/*
 /source/TestObjects/Character/Character/Debug/*
 /source/TestObjects/Vehicle/Vehicle/Debug/*
+*.log

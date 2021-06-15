@@ -9,9 +9,11 @@ Syracuse University
 
 #include "CelestialBody.h"
 #include "TestResult.h"
-#include <string>
 #include <iostream>
+#include <sstream>
 #include <vector>
+#include <thread>         // std::this_thread::sleep_for
+#include <chrono>         // std::chrono::seconds
 
 
 using std::string;
@@ -78,6 +80,7 @@ void CelestialBody::setbodyType(string e) {
 }
 
 void CelestialBody::setsurfaceHeight(double a, double b) {
+		
 		if (b == 0)
 		{
 			throw "Division by zero condition!";
@@ -85,7 +88,10 @@ void CelestialBody::setsurfaceHeight(double a, double b) {
 		else {
 			surfaceHeight=(a / b);
 		}
-	
+		srand(time(NULL));
+		int runtime = rand() % 5 + 1;
+		//cout << runtime << "thread delay time\n";
+		std::this_thread::sleep_for(std::chrono::seconds(runtime));
 }
 
 double CelestialBody::getsurfaceHeight() {
@@ -100,31 +106,33 @@ TestResponse CelestialBody::Test() {
 	TestResult result1;
 
 	result1.TestNumber = 1; // test sequence number
-	result1.TestName = "test1"; // name of test
+	result1.TestName = "Generic Test 1"; // name of test
 	result1.TestSuccess = false; // pass fail
-	result1.TestNotes = "placeholder notes1"; // placeholder for test comments
-	
+	result1.TestNotes = "There was a most unfortunate failure."; // placeholder for test comments
+	result1.LogLevel = 1;
 	results.push_back(result1);
+
 	// dummy tests function 2
 	TestResult result2;
-
 	result2.TestNumber = 2; // test sequence number
-	result2.TestName = "test2"; // name of test
+	result2.TestName = "Generic Test 2"; // name of test
 	result2.TestSuccess = true; // pass fail
-	result2.TestNotes = "placeholder notes2"; // placeholder for test comments
-
+	result2.TestNotes = "Test was a smashing success!"; // placeholder for test comments
+	result2.LogLevel = 1;
 	results.push_back(result2);
 
+	// tests function 3
 	TestResult result3;
 	result3.TestNumber = 3; // test sequence number
-	result3.TestName = "test3"; // name of test
+	result3.TestName = "Modify Class Variables"; // name of test
 	int a = distanceFromEarth;
 	int b = numberSatellites;
 
 	setsurfaceHeight(a, b);
 
 	result3.TestSuccess = true; // pass fail
-	 // placeholder for test comments
+	result3.TestNotes = "Function call on setsurfaceHeight with two ints as input";
+	result3.LogLevel = 1;
 
 	results.push_back(result3);
 
@@ -135,7 +143,15 @@ TestResponse CelestialBody::Test() {
 	return response;
 }
 
-string CelestialBody::GetTypeName()
+string CelestialBody::GetClassDescription()
 {
-	return typeid(*this).name();
+	//recreate the constructor
+	std::ostringstream stringStream;
+	stringStream << typeid(*this).name() << "(" << bodyName << ", " 
+												<< bodyType << ", " 
+												<< gravity << ", " 
+												<< numberSatellites << ", " 
+												<< distanceFromEarth << ", " 
+												<< surfaceHeight << ")";
+	return stringStream.str();
 }
