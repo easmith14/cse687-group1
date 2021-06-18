@@ -1,6 +1,0 @@
-17:29:53 Testing overall for class CelestialBody(The Sun, star, 274, 0, 1, 1): FAIL
-17:29:53 Division by zero condition!
-17:29:58 Testing overall for class CelestialBody(BlackHole Sun, star, 274, 1, 0, 0): SUCCESS
-17:29:58 TEST CASE: Generic Test 1 "There was a most unfortunate failure."
-17:29:58 TEST CASE: Generic Test 2 has PASSED. "Test was a smashing success!"
-17:29:58 TEST CASE: Modify Class Variables has PASSED. "Function call on setsurfaceHeight with two ints as input"

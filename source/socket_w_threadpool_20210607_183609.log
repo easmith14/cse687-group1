@@ -1,5 +1,0 @@
-18:36:32 Testing overall for class Spacecraft(Tesla, 0, 34): SUCCESS
-18:36:32 This spacecraft is currently flying! Wow!
-18:36:32 TEST CASE: Happy Test has PASSED. "Always Succeeds! :)"
-18:36:32 TEST CASE: Is X Position Greater Than Y? "No Notes"
-18:36:32 TEST CASE: Is The Sum Of The Positions <= 100? has PASSED. "No Notes"

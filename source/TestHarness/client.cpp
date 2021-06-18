@@ -217,7 +217,6 @@ int main()
 					}
 					getExpectedresponse(ConnectSocket, 1, jsonMessageGenerator);
 					expectedResponses--;
-					cout << "i am here\n";
 				}
 				catch(std::exception e)
 				{

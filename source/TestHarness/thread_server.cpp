@@ -16,12 +16,20 @@
 #include "TestProfileLibrary.h"
 #include "JsonMessageGenerator.h"
 #include <map>
+#include <string>
+#include "TestResponse.h"
+
+#pragma warning(disable : 4996)
 
 using namespace std;
 #define DEFAULT_PORT "13379"
 const int recvbuflen = 2048;
 const char* connect_ok = "message_ok";
 
+typedef void(__cdecl* f_char_ptr)(std::string, int);
+typedef int(__cdecl * f_vehicle_ptr)(std::string, int, int, int, int);
+typedef TestResponse(__cdecl * f_test_ptr)();
+const static bool dllDir = SetDllDirectory(TEXT("..\\DLLs"));
 
 // This class manages a thread pool that will process requests
 class thread_pool {
@@ -177,19 +185,65 @@ private:
         TestExecutor *testExecutor=new TestExecutor;
         TestResponse response;
 
-        //TODO: replace this with dynamically loaded DLL from name
+        //  WORK IN PROGRESS //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        std::string dllToTest = item.second;
+        char* cstr = new char[dllToTest.length() + 1];
+        std::strcpy(cstr, dllToTest.c_str());
+        HMODULE hGetMod = LoadLibraryA(cstr);
 
-        //load dll from string in request (item.second)
+        // lol a lot of this is hard coded for now because I didn't think well enough ahead
+        if (dllToTest == "Character.dll")
+        {
+            f_char_ptr create_character_ptr = (f_char_ptr)GetProcAddress(hGetMod, "create_character");
+            cout << "\nPreparing to load DLL function...\n";
+            create_character_ptr("Sigmar", 500);
+            if (!create_character_ptr)
+            {
+                cout << "Failed to load function!!\n\n";
+            }
+            else
+            {
+                cout << "Function loaded!!\n\n";
+            }
+        }
+        else if (dllToTest == "Vehicle.dll")
+        {
+            f_vehicle_ptr create_vehicle_ptr = (f_vehicle_ptr)GetProcAddress(hGetMod, "create_vehicle");
+            create_vehicle_ptr("Cybertruck", 30, 19, 4, 7);
+            if (!create_vehicle_ptr)
+            {
+                cout << "Failed to load function!!\n\n";
+            }
+            else
+            {
+                cout << "Function loaded!!\n\n";
+            }
+        }
+        else
+        {
+            // Something probably went bad and didn't work so here is a random character
+            f_char_ptr create_character_ptr = (f_char_ptr)GetProcAddress(hGetMod, "create_character");
+            create_character_ptr("Grombrindal", 100);
+            if (!create_character_ptr)
+            {
+                cout << "Failed to load function!!\n\n";
+            }
+            else
+            {
+                cout << "Function loaded!!\n\n";
+            }
+        }
 
-        //instantiate class
-        //iTestable classToTest;
+        // temporarily circumventing test executor until it can be refactored
+        f_test_ptr test_ptr = (f_test_ptr)GetProcAddress(hGetMod, "test");
+        response = test_ptr();
 
+        //TestResponse dllTestResponse = test_ptr();
+        logger->Log(response);
 
-        //run test
-
-        //response = testExecutor->Execute(classToTest);
-        //logger->Log(response);
-        //cout << "\n\t test run on: " << item.second << " is complete : sending results\n";
+        FreeLibrary(hGetMod);
+        cout << "\n\t DLL test run on: " << item.second << " is complete : sending results\n";
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         
         auto myid = this_thread::get_id();
         stringstream ss;
@@ -351,7 +405,6 @@ int main() {
                     string request = recievedBody;
                     tp.queueWork(ClientSocket, request);
                     testcount++;
-                    cout << "i am here\n";
                     }
                 //CMD handling - help
                 else if (std::strcmp(recievedBody, cmd_help) == 0)
