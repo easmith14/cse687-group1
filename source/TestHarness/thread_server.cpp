@@ -76,23 +76,6 @@ public:
         workQueueConditionVariable.notify_one();
     }
 
-    void setAvailableClassesToTest(std::vector<iTestable*> inpClassesToTest)
-    {
-        std::map<std::string, iTestable*> newAvailableClasses;
-
-        for (iTestable* testable : inpClassesToTest)
-        {
-            newAvailableClasses[testable->GetClassDescription()] = testable;
-        }
-
-        availableClassesToTest = newAvailableClasses;
-    }
-
-    std::map<std::string, iTestable*> getAvailableClassesToTest()
-    {
-        return availableClassesToTest;
-    }
-
     void setDone(bool done)
     {
         done = done;
@@ -158,9 +141,6 @@ private:
 
     std::queue<std::pair<int, std::string>> sendQueue;
 
-    // Library of possible classes to test
-    std::map<std::string, iTestable*> availableClassesToTest;
-
     //address that we are running from (for message purposes)
     std::string sourceAddress;
 
@@ -197,8 +177,18 @@ private:
         TestExecutor *testExecutor=new TestExecutor;
         TestResponse response;
 
-        response = testExecutor->Execute(availableClassesToTest[item.second]);
-        logger->Log(response);
+        //TODO: replace this with dynamically loaded DLL from name
+
+        //load dll from string in request (item.second)
+
+        //instantiate class
+        //iTestable classToTest;
+
+
+        //run test
+
+        //response = testExecutor->Execute(classToTest);
+        //logger->Log(response);
         //cout << "\n\t test run on: " << item.second << " is complete : sending results\n";
         
         auto myid = this_thread::get_id();
@@ -288,7 +278,7 @@ int main() {
 
     //grab the possible testable classes
 	TestProfileLibrary library;
-    tp.setAvailableClassesToTest(library.GetTestList());
+    vector<string> availableClassesToTest = library.GetTestList();
 
 
     //create a JsonConverter to handle any JSON tasks
@@ -316,7 +306,7 @@ int main() {
             closesocket(ClientSocket);
             WSACleanup();
         }
-        message = jsonMessageGenerator.GenerateMessageFromClassNames(tp.getAvailableClassesToTest());
+        message = jsonMessageGenerator.GenerateMessageFromClassNames(availableClassesToTest);
         iSendResult = send(ClientSocket, message, (int)strlen(message), 0);
         if (iSendResult == SOCKET_ERROR) {
             printf("send failed: %d\n", WSAGetLastError());
@@ -379,7 +369,7 @@ int main() {
                 else if (std::strcmp(recievedBody, cmd_classes) == 0)
                     {
                         cout << " client cmd entered - classes\n";
-                        const char* possibleClasses = jsonMessageGenerator.GenerateMessageFromClassNames(tp.getAvailableClassesToTest());
+                        const char* possibleClasses = jsonMessageGenerator.GenerateMessageFromClassNames(availableClassesToTest);
                         iSendResult = send(ClientSocket, possibleClasses, (int)strlen(possibleClasses), 0);
                         if (iSendResult == SOCKET_ERROR) {
                         printf("send failed: %d\n", WSAGetLastError());

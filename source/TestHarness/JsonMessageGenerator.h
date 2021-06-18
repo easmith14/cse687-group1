@@ -20,7 +20,7 @@ public:
 
 	const char* GenerateMessage(string message, MessageType messageType);
 
-	const char* GenerateMessageFromClassNames(map<string, iTestable*> classOptions);
+	const char* GenerateMessageFromClassNames(vector<string> classOptions);
 
 	const char* GenerateMessageFromTestResponse(TestResponse response);
 
