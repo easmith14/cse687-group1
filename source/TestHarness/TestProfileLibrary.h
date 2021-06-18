@@ -25,5 +25,5 @@ public:
     ~TestProfileLibrary();
 
     //instantiates objects and returns vector of created objects
-    vector<iTestable*> GetTestList();
+    vector<string> GetTestList();
 };

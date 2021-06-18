@@ -3,14 +3,14 @@
 #include "JsonMessageGenerator.h"
 #include <ctime>
 
-const char* JsonMessageGenerator::GenerateMessageFromClassNames(map<string, iTestable*> classOptions)
+const char* JsonMessageGenerator::GenerateMessageFromClassNames(vector<string> classOptions)
 {
     //generate Json Value for class names
     Json::Value classNames;
 
     for (auto className : classOptions)
     {
-        classNames.append(className.first);
+        classNames.append(className);
     }
 
     //set values for base message
