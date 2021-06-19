@@ -237,6 +237,7 @@ private:
         // temporarily circumventing test executor until it can be refactored
         f_test_ptr test_ptr = (f_test_ptr)GetProcAddress(hGetMod, "test");
         response = test_ptr();
+        response.ClassName = item.second; // added to record dll in response
 
         //TestResponse dllTestResponse = test_ptr();
         logger->Log(response);
