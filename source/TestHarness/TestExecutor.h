@@ -15,6 +15,6 @@ Syracuse University
 class TestExecutor
 {
 public:
-	TestResponse Execute(iTestable* testClass);
+	TestResponse Execute(string testClass);
 };
 
