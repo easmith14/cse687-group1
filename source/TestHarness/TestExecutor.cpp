@@ -37,50 +37,7 @@ TestResponse TestExecutor::Execute(string dllToTest)
     std::strcpy(cstr, dllToTest.c_str());
     HMODULE hGetMod = LoadLibraryA(cstr);
 
-    //// lol a lot of this is hard coded for now because I didn't think well enough ahead
-    //if (dllToTest == "Character.dll")
-    //{
-    //    f_char_ptr create_character_ptr = (f_char_ptr)GetProcAddress(hGetMod, "create_character");
-    //    cout << "\nPreparing to load DLL function...\n";
-    //    create_character_ptr("Sigmar", 500);
-    //    if (!create_character_ptr)
-    //    {
-    //        cout << "Failed to load function!!\n\n";
-    //    }
-    //    else
-    //    {
-    //        cout << "Function loaded!!\n\n";
-    //    }
-    //}
-    //else if (dllToTest == "Vehicle.dll")
-    //{
-    //    f_vehicle_ptr create_vehicle_ptr = (f_vehicle_ptr)GetProcAddress(hGetMod, "create_vehicle");
-    //    create_vehicle_ptr("Cybertruck", 30, 19, 4, 7);
-    //    if (!create_vehicle_ptr)
-    //    {
-    //        cout << "Failed to load function!!\n\n";
-    //    }
-    //    else
-    //    {
-    //        cout << "Function loaded!!\n\n";
-    //    }
-    //}
-    //else
-    //{
-    //    // Something probably went bad and didn't work so here is a random character
-    //    f_char_ptr create_character_ptr = (f_char_ptr)GetProcAddress(hGetMod, "create_character");
-    //    create_character_ptr("Grombrindal", 100);
-    //    if (!create_character_ptr)
-    //    {
-    //        cout << "Failed to load function!!\n\n";
-    //    }
-    //    else
-    //    {
-    //        cout << "Function loaded!!\n\n";
-    //    }
-    //}
-
-    // temporarily circumventing test executor until it can be refactored
+    // call the DLL function from here directly
     f_test_ptr test_ptr = (f_test_ptr)GetProcAddress(hGetMod, "test");
 
 	TestResponse response;
@@ -94,12 +51,8 @@ TestResponse TestExecutor::Execute(string dllToTest)
 		response.Notes = msg;
 	}
 
-	
-
-
     FreeLibrary(hGetMod);
 	return response;
-	
 
 }
 

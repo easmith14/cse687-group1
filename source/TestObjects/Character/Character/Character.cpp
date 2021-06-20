@@ -5,30 +5,31 @@
 #include "../../../TestHarness/TestResult.h"
 using std::string;
 
-static string _CharName;
-static int _CharLevel;
-static int _CharMaxHealth;
-static int _CharCurrentHealth;
-static int _CharStrength;
-static int _CharDexterity;
-static int _CharIntelligence;
+// Some defaults unless create is called
+static string _CharName = "Grombrindal";
+static int _CharLevel = 10;
+static int _CharMaxHealth = 100;
+static int _CharCurrentHealth = 100;
+static int _CharStrength = 5;
+static int _CharDexterity = 5;
+static int _CharIntelligence = 5;
 
 static const int _HealthBase = 100;
 static const int _HealthScalingFactor = 10;
 static const int _StatBase = 5;
 static const int _StatScalingFactor = 1;
 
-void create_character(const string a, const int b)
+void create_entity(const string a, const int b, const int c, const int d, const int e)
 {
 	_CharName = a;
 	_CharLevel = b;
+	_CharStrength = c;
+	_CharDexterity = d;
+	_CharIntelligence = e;
 
-	// Stats determined by base amount plus scaling amount per level
-	// stat = base + scaling_factor * level
-	_CharMaxHealth = _HealthBase + _HealthScalingFactor * _CharLevel;
-	_CharStrength = _StatBase + _StatScalingFactor * _CharLevel;
-	_CharDexterity = _StatBase + _StatScalingFactor * _CharLevel;
-	_CharIntelligence = _StatBase + _StatScalingFactor * _CharLevel;
+	// Max health determined by base amount and scales by strength
+	// stat = base + scaling_factor * strength
+	_CharMaxHealth = _HealthBase + _HealthScalingFactor * _CharStrength;
 
 	// Set current health to max health for new character
 	_CharCurrentHealth = _CharMaxHealth;
@@ -110,7 +111,7 @@ TestResponse test()
 	// Test Case 3 : Character Transcends Humanity
 	TestResult transcendResult;
 	transcendResult.LogLevel = 1;
-	transcendResult.TestName = "Transcend Mortal Coil";
+	transcendResult.TestName = "Transcend Mortal Bounds";
 	transcendResult.TestNotes = "And this is to go even further.. beyond";
 	transcendResult.TestNumber = 3;
 

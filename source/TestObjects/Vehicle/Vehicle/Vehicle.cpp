@@ -5,14 +5,15 @@
 #include "../../../TestHarness/TestResult.h"
 using std::string;
 
-static string _VehicleName;
-static int _xPos;
-static int _yPos;
-static int _xVel;
-static int _yVel;
+// Just a bunch of defaults
+static string _VehicleName = "Cruiser";
+static int _xPos = 500;
+static int _yPos = 500;
+static int _xVel = 10;
+static int _yVel = 10;
 static string _VehicleColor;
 
-void create_vehicle(const string a, const int b, const int c, const int d, const int e)
+void create_entity(const string a, const int b, const int c, const int d, const int e)
 {
 	_VehicleName = a;
 	_xPos = b;

@@ -11,7 +11,7 @@
 #include <string>
 using std::string;
 
-extern "C" VEHICLE_API void create_vehicle(const string a, const int b, const int c, const int d, const int e);
+extern "C" VEHICLE_API void create_entity(const string a, const int b, const int c, const int d, const int e);
 
 extern "C" VEHICLE_API void move_vehicle(const int a, const int b);
 

@@ -124,7 +124,15 @@ int main()
 	}
 
 	//ready to connect
-	cout << "\n\tCLIENT: Ready to connect - ";
+	cout << "\n";
+	cout << "   _____          _                                           \n";
+	cout << "  /__   \\___  ___| |_    /\\  /\\__ _ _ __ _ __   ___  ___ ___  \n";
+	cout << "    / /\\/ _ \\/ __| __|  / /_/ / _` | '__| '_ \\ / _ \\/ __/ __| \n";
+	cout << "   / / |  __/\\__ \\ |_  / __  / (_| | |  | | | |  __/\\__ \\__ \\ \n";
+	cout << "   \\/   \\___||___/\\__| \\/ /_/ \\__,_|_|  |_| |_|\\___||___/___/ \n";
+	cout << "\n";
+	cout << "\n";
+	cout << "\n  CLIENT: Ready to connect - ";
 	system("PAUSE");
 
 	//prep buffer and client messages

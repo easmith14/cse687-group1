@@ -11,7 +11,7 @@
 #include <string>
 using std::string;
 
-extern "C" CHARACTER_API void create_character(const string a, const int b);
+extern "C" CHARACTER_API void create_entity(const string a, const int b, const int c, const int d, const int e);
 
 extern "C" CHARACTER_API void receive_damage(const int a);
 
