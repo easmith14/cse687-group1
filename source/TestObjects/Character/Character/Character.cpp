@@ -114,9 +114,8 @@ TestResponse test()
 	transcendResult.TestNotes = "And this is to go even further.. beyond";
 	transcendResult.TestNumber = 3;
 
-	// test should break since level is stored as an int
-	unsigned long maxULong = 2147483647;
-	for (unsigned long i = 0; i < maxULong; i++)
+	int thresholdOfGreatness = 1000;
+	for (int i = 0; i < thresholdOfGreatness; i++)
 	{
 		level_up();
 	}
